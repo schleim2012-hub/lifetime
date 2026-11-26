@@ -14,6 +14,9 @@ function tset(x,y,t){ const w=G.w; if(x<0||y<0||x>=w.W||y>=w.H) return; const i=
 function bset(x,y,b){ const w=G.w; if(x<0||y<0||x>=w.W||y>=w.H) return; w.bg[y*w.W+x]=b; }
 function opaque(t){ const d=TILES[t]; return d&&d.s&&!d.glass; }
 function updSky(x){ const w=G.w; let y=0; while(y<w.H&&!opaque(w.tiles[y*w.W+x])) y++; w.sky[x]=y; }
+// Erkundungs-Raster (8×8 Kacheln); alte kleine Welten behalten Raster-Breite 200
+function EXS(){ return G.w&&G.w.W>1600?Math.ceil(G.w.W/8):200; }
+function EXLEN(){ return Math.max(8000,EXS()*Math.ceil(((G.w&&G.w.H)||240)/8)); }
 function initSky(){ const w=G.w; w.sky=new Int16Array(w.W); for(let x=0;x<w.W;x++) updSky(x); }
 function surfaceY(x){ x=Math.max(0,Math.min(G.w.W-1,x|0)); let y=0; while(y<G.w.H&&!(TILES[tget(x,y)].s||tget(x,y)===5)) y++; return y; }
 function hour(){ return (6+G.time*24)%24; }

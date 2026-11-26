@@ -36,7 +36,7 @@ function updatePlayer(dt){ const P=G.player; if(P.dead) return;
   // Welt-Grenzen
   P.x=Math.max(3*T,Math.min((G.w.W-4)*T,P.x)); if(P.y>(G.w.H-4)*T) P.y=(G.w.H-4)*T;
   // Erkunden
-  const ex=Math.floor(P.x/T/8), ey=Math.floor(P.y/T/8); for(let a1=-3;a1<=3;a1++)for(let b=-2;b<=2;b++){ const k=(ey+b)*200+(ex+a1); if(k>=0) G.explored[k]=1; }
+  const ex=Math.floor(P.x/T/8), ey=Math.floor(P.y/T/8); for(let a1=-3;a1<=3;a1++)for(let b=-2;b<=2;b++){ const k=(ey+b)*EXS()+(ex+a1); if(k>=0) G.explored[k]=1; }
 }
 function survival(dt){ const P=G.player; if(P.dead) return; const ue=(1-P.sk.ueberleben*0.12)*SKILLFX.hunger();
   P.hu=Math.max(0,P.hu-dt*0.1*ue); P.th=Math.max(0,P.th-dt*0.145*ue);

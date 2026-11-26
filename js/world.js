@@ -1,12 +1,14 @@
 // Lifetime – Weltgenerator (jede Welt neu)
 'use strict';
+// 0.7: große Welt (vorher 1000×240)
+const WORLD_W=3200, WORLD_H=300;
 function genWorld(seed){
   const R=rngSeed(seed); const ri=(a,b)=>a+Math.floor(R()*(b-a+1));
-  const W=1000,H=240; const tiles=new Uint8Array(W*H), bg=new Uint8Array(W*H);
+  const W=WORLD_W,H=WORLD_H; const tiles=new Uint8Array(W*H), bg=new Uint8Array(W*H);
   const I=(x,y)=>y*W+x; const inb=(x,y)=>x>=0&&y>=0&&x<W&&y<H;
   const set=(x,y,t)=>{ if(inb(x,y)) tiles[I(x,y)]=t; }; const get=(x,y)=>inb(x,y)?tiles[I(x,y)]:17;
   const setbg=(x,y,b)=>{ if(inb(x,y)) bg[I(x,y)]=b; };
-  const ents=[]; const feat={camps:[],houses:[],towers:[],cann:null,city:null,lake:null,stash:null,lairs:[]};
+  const ents=[]; const feat={camps:[],houses:[],towers:[],cann:null,city:null,lake:null,lakes:[],suburbs:[],stash:null,lairs:[]};
   // ---- Abschnitte ----
   const segs=[]; let x=30;
   const push=(type,w)=>{ segs.push({type,x0:x,x1:x+w}); x+=w; };
@@ -18,6 +20,10 @@ function genWorld(seed){
   push('wald',ri(30,40));
   const cityW=Math.min(W-30-x-70, ri(230,260)); push('stadt',cityW);
   push('camp',60);
+  push('wald',ri(40,60));
+  // 0.7: weitere Gegenden hinter der Stadt (große Welt)
+  { const ext=['wald_haus','see','vorort','camp','wald','wald_haus','vorort','see','wald','camp','wald_haus','vorort','wald','see']; let ei=ri(0,3);
+    while(W-30-x>260){ const t=ext[ei++%ext.length]; const w=t==='wald'?ri(60,110):t==='see'?ri(62,72):t==='vorort'?ri(120,170):t==='camp'?60:ri(110,140); push(t,w); push('wald',ri(25,50)); } }
   push('wald',W-30-x);
   // ---- Höhenprofil ----
   const base=85; const hs=new Array(W);
@@ -25,8 +31,8 @@ function genWorld(seed){
   for(let i=0;i<W;i++){ hs[i]=base+Math.sin(i*0.021+p1)*7+Math.sin(i*0.063+p2)*3+Math.sin(i*0.17+p3)*1.2; }
   const segAt=i=>segs.find(s=>i>=s.x0&&i<s.x1)||{type:'wald'};
   for(const s of segs){
-    if(s.type==='stadt'||s.type==='camp'){ const lv=Math.round(hs[s.x0]); for(let i=s.x0-8;i<s.x1+8;i++){ if(i<0||i>=W) continue; const k=i<s.x0?(s.x0-i)/8:i>=s.x1?(i-s.x1+1)/8:0; hs[i]=lv*(1-k)+hs[i]*k; } }
-    if(s.type==='see'){ const c=(s.x0+s.x1)/2, hw=(s.x1-s.x0)/2-14; feat.lake={x0:s.x0,x1:s.x1,lv:Math.round(hs[s.x0])+1}; for(let i=s.x0;i<s.x1;i++){ const d=Math.abs(i-c)/hw; if(d<1) hs[i]=feat.lake.lv+Math.round(Math.cos(d*Math.PI/2)*14); } }
+    if(s.type==='stadt'||s.type==='camp'||s.type==='vorort'){ const lv=Math.round(hs[s.x0]); for(let i=s.x0-8;i<s.x1+8;i++){ if(i<0||i>=W) continue; const k=i<s.x0?(s.x0-i)/8:i>=s.x1?(i-s.x1+1)/8:0; hs[i]=lv*(1-k)+hs[i]*k; } }
+    if(s.type==='see'){ const c=(s.x0+s.x1)/2, hw=(s.x1-s.x0)/2-14; const lk={x0:s.x0,x1:s.x1,lv:Math.round(hs[s.x0])+1}; feat.lakes.push(lk); if(!feat.lake) feat.lake=lk; for(let i=s.x0;i<s.x1;i++){ const d=Math.abs(i-c)/hw; if(d<1) hs[i]=lk.lv+Math.round(Math.cos(d*Math.PI/2)*14); } }
   }
   for(let i=0;i<W;i++) hs[i]=Math.round(hs[i]);
   // ---- Füllen ----
@@ -40,22 +46,22 @@ function genWorld(seed){
     }
   }
   // Erz-Adern verdicken
-  for(let k=0;k<1800;k++){ const xx=ri(0,W-1), yy=ri(0,H-1); const t=get(xx,yy); if(t===14||t===15||t===16||t===40){ for(let j=0;j<4;j++){ const a=xx+ri(-1,1), b=yy+ri(-1,1); if(get(a,b)===3) set(a,b,t);} } }
+  for(let k=0;k<Math.round(1800*W*H/240000);k++){ const xx=ri(0,W-1), yy=ri(0,H-1); const t=get(xx,yy); if(t===14||t===15||t===16||t===40){ for(let j=0;j<4;j++){ const a=xx+ri(-1,1), b=yy+ri(-1,1); if(get(a,b)===3) set(a,b,t);} } }
   // ---- Höhlen (Würmer) ----
   const carve=(cx,cy,r)=>{ for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){ if(a*a+b*b<=r*r+0.5){ const X=Math.round(cx+a),Y=Math.round(cy+b); if(inb(X,Y)&&Y<H-4&&get(X,Y)!==17) set(X,Y,0);} } };
-  for(let k=0;k<70;k++){
+  for(let k=0;k<Math.round(70*W*H/240000);k++){
     let cx=ri(40,W-40), cy=ri(base+15,H-20); let ang=R()*Math.PI*2; const len=ri(40,140); let r=ri(1,2)+R()+0.4;
     const s=segAt(cx); if(s.type==='stadt'&&cy<base+25) cy+=25;
     for(let j=0;j<len;j++){ carve(cx,cy,r); ang+=(R()-0.5)*0.5; cx+=Math.cos(ang); cy+=Math.sin(ang)*0.6; r=Math.max(1.7,Math.min(3.4,r+(R()-0.5)*0.3)); if(cy<base+10) ang=Math.abs(ang); if(cy>H-10) ang=-Math.abs(ang); }
   }
   // Höhleneingänge im Wald
-  for(let k=0;k<5;k++){ const s=segs.filter(s=>s.type.startsWith('wald'))[ri(0,2)]; if(!s) continue; let cx=ri(s.x0+10,s.x1-10), cy=hs[cx]-1; let ang=Math.PI/2+(R()-0.5); for(let j=0;j<ri(25,45);j++){ carve(cx,cy,2); ang+=(R()-0.5)*0.4; cx+=Math.cos(ang)*0.8; cy+=Math.abs(Math.sin(ang)); } }
+  const wsegs=segs.filter(s=>s.type.startsWith('wald')); for(let k=0;k<Math.round(5*W/1000);k++){ const s=wsegs[k<5?ri(0,2):ri(0,wsegs.length-1)]; if(!s) continue; let cx=ri(s.x0+10,s.x1-10), cy=hs[cx]-1; let ang=Math.PI/2+(R()-0.5); for(let j=0;j<ri(25,45);j++){ carve(cx,cy,2); ang+=(R()-0.5)*0.4; cx+=Math.cos(ang)*0.8; cy+=Math.abs(Math.sin(ang)); } }
   // Mutanten-Höhlen (große Räume tief unten)
-  for(let k=0;k<3;k++){ const cx=ri(80,W-80), cy=ri(170,205); for(let a=-12;a<=12;a++)for(let b=-5;b<=4;b++){ if((a*a)/144+(b*b)/25<1) set(cx+a,cy+b,0);} for(let a=-12;a<=12;a++){ for(let b=4;b<8;b++) if(get(cx+a,cy+b)===0) set(cx+a,cy+b,3);} for(let j=0;j<6;j++) set(cx+ri(-10,10),cy+4,39);
-    feat.lairs.push({x:cx,y:cy+4}); ents.push({k:'mob',t:['doppelkopf','armige','spinnenfrau'][k],x:cx,y:cy+3,sleep:true});
+  for(let k=0;k<(W>1600?7:3);k++){ const cx=ri(80,W-80), cy=ri(170,H-35); for(let a=-12;a<=12;a++)for(let b=-5;b<=4;b++){ if((a*a)/144+(b*b)/25<1) set(cx+a,cy+b,0);} for(let a=-12;a<=12;a++){ for(let b=4;b<8;b++) if(get(cx+a,cy+b)===0) set(cx+a,cy+b,3);} for(let j=0;j<6;j++) set(cx+ri(-10,10),cy+4,39);
+    feat.lairs.push({x:cx,y:cy+4}); ents.push({k:'mob',t:['doppelkopf','armige','spinnenfrau'][k%3],x:cx,y:cy+3,sleep:true});
     set(cx-6,cy+3,21); set(cx+6,cy+3,21); }
   // Pilz-Biom (blau leuchtend)
-  { const mx=ri(150,W-200), my=ri(125,150); feat.shroom={x0:mx-35,x1:mx+35,y:my};
+  for(let sk=0;sk<(W>1600?3:1);sk++){ const mx=ri(150,W-200), my=sk?ri(140,H-60):ri(125,150); if(!sk) feat.shroom={x0:mx-35,x1:mx+35,y:my};
     for(let k=0;k<5;k++){ let cx2=mx-30+k*12, cy2=my+ri(-8,8); for(let j=0;j<20;j++){ carve(cx2,cy2,2.4); cx2+=1.2; cy2+=(R()-0.5)*1.5; } }
     for(let x=mx-38;x<mx+38;x++) for(let y=my-22;y<my+24;y++){ const t=get(x,y); if(t===3||t===1||t===46||t===14||t===16) { set(x,y,56); setbg(x,y,5); } }
     for(let x=mx-38;x<mx+38;x++) for(let y=my-22;y<my+24;y++){ if(get(x,y)===56&&get(x,y-1)===0){ set(x,y,54); if(R()<0.3&&get(x,y-2)===0) set(x,y-1,55); } } }
@@ -66,7 +72,7 @@ function genWorld(seed){
   for(let i=0;i<W;i++) for(let y=H-3;y<H;y++) set(i,y,17);
   for(let y=0;y<H;y++){ for(let i=0;i<3;i++){ set(i,y,17); set(W-1-i,y,17);} }
   // ---- See ----
-  if(feat.lake){ const L=feat.lake; for(let i=L.x0+12;i<L.x1-12;i++){ for(let y=L.lv;y<hs[i];y++){ set(i,y,5); setbg(i,y,0);} for(let y=hs[i];y<hs[i]+3;y++) if(get(i,y)!==0) set(i,y,4); }
+  for(const L of feat.lakes){ for(let i=L.x0+12;i<L.x1-12;i++){ for(let y=L.lv;y<hs[i];y++){ set(i,y,5); setbg(i,y,0);} for(let y=hs[i];y<hs[i]+3;y++) if(get(i,y)!==0) set(i,y,4); }
     // Ufer sand
     for(let i=L.x0-4;i<L.x1+4;i++){ if(get(i,hs[i])===2) set(i,hs[i],4); } }
   // ---- Bäume, Büsche ----
@@ -164,7 +170,7 @@ function genWorld(seed){
   let npcPool=['kalle','mecki'];
   for(const s of segs){
     if(s.type==='wald_haus'){ let hx=s.x0+8; let k=0; while(hx<s.x1-20){ house(hx,{npc:k<2?npcPool[k]:null}); k++; hx+=ri(30,45);} }
-    if(s.type==='see'){ house(s.x0+1,{w:9,fl:1,npc:'gerda'}); }
+    if(s.type==='see'){ house(s.x0+1,{w:9,fl:1,npc:s===segs.find(q=>q.type==='see')?'gerda':null}); }
     if(s.type==='camp'){ const gy=hs[s.x0+30]; const a=s.x0+8,b=s.x1-8; flatten(a-2,b+2,gy);
       for(let y=gy-5;y<gy;y++){ set(a,y,8); set(b,y,8);} door(a,gy); door(b,gy); set(a,gy-4,8); set(b,gy-4,8);
       for(let i=a;i<=b;i+=2) set(i,gy-6,R()<0.5?27:0);
@@ -206,17 +212,23 @@ function genWorld(seed){
       // Zombies auf der Straße
       for(let k=0;k<8;k++) ents.push({k:'mob',t:ZOMBIE_NAMES[ri(0,12)],x:ri(s.x0,s.x1),y:gy-1,sleep:R()<0.5});
     }
+    if(s.type==='vorort'){ // 0.7: verlassene Vorstadt mit kleineren Hochhäusern
+      const gy=hs[s.x0+5]; flatten(s.x0,s.x1,gy); for(let i=s.x0;i<s.x1;i++){ set(i,gy,33); set(i,gy+1,11);} feat.suburbs.push({x0:s.x0,x1:s.x1,y:gy});
+      let hx=s.x0+6; while(hx<s.x1-24){ const w=ri(13,19); if(R()<0.3) house(hx,{fl:2}); else tower(hx,w,ri(3,6),gy,{}); hx+=w+ri(6,12); }
+      for(let k=0;k<3;k++){ const ax=ri(s.x0+3,s.x1-8); if(get(ax,gy-1)!==0||get(ax+4,gy-1)!==0) continue; for(let i=ax;i<ax+5;i++) set(i,gy-1,13); set(ax+1,gy-2,13); set(ax+2,gy-2,12); set(ax+3,gy-2,13); }
+      for(let k=0;k<5;k++) ents.push({k:'mob',t:ZOMBIE_NAMES[ri(0,12)],x:ri(s.x0,s.x1),y:gy-1,sleep:R()<0.6});
+    }
   }
   // Fehlende NPCs irgendwo im Wald
   for(const id of ['kalle','gerda','mecki','doris']){ if(!ents.find(e=>e.k==='npc'&&e.t===id)){ const s=segs.find(s=>s.type.startsWith('wald')&&s!==segs[0])||segs[segs.length-1]; const hx=ri(s.x0+5,Math.max(s.x0+6,s.x1-20)); house(hx,{npc:id,fl:1}); } }
   // Tiere
-  for(let k=0;k<35;k++){ const s=segs[ri(0,segs.length-1)]; if(s.type==='stadt') continue; const ax=ri(s.x0,s.x1-1); ents.push({k:'mob',t:['hase','hase','hirsch','huhn'][ri(0,3)],x:ax,y:hs[ax]-1}); }
+  for(let k=0;k<Math.round(35*W/1000);k++){ const s=segs[ri(0,segs.length-1)]; if(s.type==='stadt') continue; const ax=ri(s.x0,s.x1-1); ents.push({k:'mob',t:['hase','hase','hirsch','huhn'][ri(0,3)],x:ax,y:hs[ax]-1}); }
   // Spiegeln (Welt mal links, mal rechts)
   const flip=R()<0.5;
   if(flip){ const fx=v=>W-1-v; for(let y=0;y<H;y++){ const a=tiles.subarray(y*W,(y+1)*W); a.reverse(); const b=bg.subarray(y*W,(y+1)*W); b.reverse(); }
     for(const e of ents) e.x=fx(e.x); spawn.x=fx(spawn.x);
     const fr=o=>{ if(!o) return; if(o.x0!=null){ const a=fx(o.x1),b=fx(o.x0); o.x0=a; o.x1=b; } if(o.x!=null) o.x=fx(o.x); };
-    feat.camps.forEach(fr); feat.houses.forEach(fr); feat.towers.forEach(fr); fr(feat.cann); fr(feat.city); fr(feat.lake); fr(feat.stash); fr(feat.wreck); feat.lairs.forEach(fr);
+    feat.camps.forEach(fr); feat.houses.forEach(fr); feat.towers.forEach(fr); fr(feat.cann); fr(feat.city); feat.lakes.forEach(fr); feat.suburbs.forEach(fr); fr(feat.stash); fr(feat.wreck); feat.lairs.forEach(fr);
   }
   return {W,H,tiles,bg,seed,spawn,feat,ents,segs:segs.map(s=>s.type)};
 }

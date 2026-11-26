@@ -28,7 +28,7 @@ const UI={pick:null,tab:'inv',cont:null,hudT:0,
    if(!UI.mmCols){ UI.mmCols=TILES.map(t=>{ if(!t) return [0,0,0]; const v=parseInt((t.c.length===4?t.c.replace(/#(.)(.)(.)/,'#$1$1$2$2$3$3'):t.c).slice(1),16); return [v>>16&255,v>>8&255,v&255]; }); }
    const id=g.createImageData(Wc,Hc), D=id.data; const ptx=(P.x+P.w/2)/T, pty=(P.y+P.h/2)/T; const dl=dayLight();
    for(let j=0;j<Hc;j++)for(let i=0;i<Wc;i++){ const x=Math.floor(ptx+(i-Wc/2)*z), y=Math.floor(pty+(j-Hc/2)*z); const k=(j*Wc+i)*4; let r=0,gg=0,b=0;
-     if(x>=0&&y>=0&&x<w.W&&y<w.H&&G.explored[(y>>3)*200+(x>>3)]){ const t=w.tiles[y*w.W+x]; if(t){ [r,gg,b]=UI.mmCols[t]; } else if(w.bg[y*w.W+x]){ r=40;gg=30;b=28; } else if(y<w.sky[x]){ r=60+80*dl|0; gg=90+110*dl|0; b=140+100*dl|0; } else { r=20;gg=14;b=10; } }
+     if(x>=0&&y>=0&&x<w.W&&y<w.H&&G.explored[(y>>3)*EXS()+(x>>3)]){ const t=w.tiles[y*w.W+x]; if(t){ [r,gg,b]=UI.mmCols[t]; } else if(w.bg[y*w.W+x]){ r=40;gg=30;b=28; } else if(y<w.sky[x]){ r=60+80*dl|0; gg=90+110*dl|0; b=140+100*dl|0; } else { r=20;gg=14;b=10; } }
      D[k]=r; D[k+1]=gg; D[k+2]=b; D[k+3]=255; }
    g.putImageData(id,0,0);
    const dot=(e,col,s)=>{ const x=Wc/2+((e.x+e.w/2)/T-ptx)/z, y=Hc/2+((e.y+e.h/2)/T-pty)/z; if(x<0||y<0||x>Wc||y>Hc) return; g.fillStyle='#000'; g.fillRect(x-s/2-1|0,y-s/2-1|0,s+2,s+2); g.fillStyle=col; g.fillRect(x-s/2|0,y-s/2|0,s,s); };
@@ -69,10 +69,10 @@ const UI={pick:null,tab:'inv',cont:null,hudT:0,
    $('pbody').innerHTML=h; },
  renderMap(){ const w=G.w; $('pbody').innerHTML=`<canvas id="mapc" width="${w.W}" height="${w.H}"></canvas><div class="info">Rot: du · Grün: Bett · Gelb: Leute · Violett: Lager & Siedlungen. Schwarze Flächen sind noch unerforscht.</div>`;
    const c=$('mapc'), g=c.getContext('2d'); const img=g.createImageData(w.W,w.H); const D=img.data; const cols=TILES.map(t=>{ if(!t) return [0,0,0]; const s=t.c.slice(1); const h=s.length===3?s.split('').map(x=>x+x).join(''):s; const v=parseInt(h,16); return [v>>16&255,v>>8&255,v&255]; });
-   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){ const i=y*w.W+x; const k=(y>>3)*200+(x>>3); let r=0,gg=0,b=0; if(G.explored[k]){ const t=w.tiles[i]; if(t){ [r,gg,b]=cols[t]; } else if(w.bg[i]){ r=50;gg=40;b=35; } else if(y<w.sky[x]){ r=110;gg=160;b=220; } else { r=30;gg=22;b=16; } } D[i*4]=r;D[i*4+1]=gg;D[i*4+2]=b;D[i*4+3]=255; }
+   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){ const i=y*w.W+x; const k=(y>>3)*EXS()+(x>>3); let r=0,gg=0,b=0; if(G.explored[k]){ const t=w.tiles[i]; if(t){ [r,gg,b]=cols[t]; } else if(w.bg[i]){ r=50;gg=40;b=35; } else if(y<w.sky[x]){ r=110;gg=160;b=220; } else { r=30;gg=22;b=16; } } D[i*4]=r;D[i*4+1]=gg;D[i*4+2]=b;D[i*4+3]=255; }
    g.putImageData(img,0,0); const P=G.player; g.fillStyle='#ff1744'; g.fillRect(P.x/T-3,P.y/T-3,7,7); g.fillStyle='#69f0ae'; g.fillRect(P.spawn.x-2,P.spawn.y-2,5,5);
-   g.fillStyle='#ffd54f'; for(const e of G.ents) if(e.kind==='npc'&&G.explored[((e.y/T)>>3)*200+((e.x/T)>>3)]) g.fillRect(e.x/T-2,e.y/T-2,4,4);
-   g.fillStyle='#e040fb'; for(const c2 of w.feat.camps) if(G.explored[(c2.y>>3)*200+(c2.x0>>3)]) g.fillRect(c2.x0,c2.y-6,c2.x1-c2.x0,2); },
+   g.fillStyle='#ffd54f'; for(const e of G.ents) if(e.kind==='npc'&&G.explored[((e.y/T)>>3)*EXS()+((e.x/T)>>3)]) g.fillRect(e.x/T-2,e.y/T-2,4,4);
+   g.fillStyle='#e040fb'; for(const c2 of w.feat.camps) if(G.explored[(c2.y>>3)*EXS()+(c2.x0>>3)]) g.fillRect(c2.x0,c2.y-6,c2.x1-c2.x0,2); },
  renderStory(){ const met=G.ents.filter(e=>e.kind==='npc'&&e.met); let h=`<h3>Tagebuch – Tag ${G.day}</h3><div class="info">Unser Flieger ist abgestürzt. Seit diesem grellen Licht am Himmel ist nichts mehr normal. Niemand weiß, was passiert ist – jeder hat eine andere Theorie.</div>`;
    for(const e of met){ const d=NPCS[e.t]; h+=`<div class="info"><b>${d.n}</b> (${d.role}) glaubt: <i>${d.theory}</i></div>`; }
    if(!met.length) h+='<div class="info">Noch keine Überlebenden getroffen. Vielleicht in den Häusern oder in der Stadt?</div>';
