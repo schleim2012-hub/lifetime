@@ -15,7 +15,7 @@ function loadMusic(file){ const c=SND.ctx; let tr=MUSX.tr[file]; if(tr) return t
     x.onerror=fail; x.send(); }catch(e){ fail(); }
   return tr; }
 function startMusic(tr,fade){ const c=SND.ctx; if(!tr.buf) return; if(!tr.g){ tr.g=c.createGain(); tr.g.gain.value=0; tr.g.connect(musBus()); }
-  if(!tr.src){ const s=c.createBufferSource(); s.buffer=tr.buf; s.loop=true; s.connect(tr.g); s.start(c.currentTime+0.05); tr.src=s; }
+  if(!tr.src){ const s=c.createBufferSource(); s.buffer=tr.buf; s.loop=true; if(tr.lp==null){ const d=tr.buf.getChannelData(0), n=d.length; let a=0,b=n-1; while(a<n&&Math.abs(d[a])<0.0015) a++; while(b>a&&Math.abs(d[b])<0.0015) b--; tr.lp=[a/tr.buf.sampleRate,(b+1)/tr.buf.sampleRate]; } if(tr.lp[1]-tr.lp[0]>5){ s.loopStart=tr.lp[0]; s.loopEnd=tr.lp[1]; } s.connect(tr.g); s.start(c.currentTime+0.05,tr.lp[1]-tr.lp[0]>5?tr.lp[0]:0); tr.src=s; }
   rampMusic(tr,tr.target,fade); }
 function rampMusic(tr,v,fade){ if(!tr.g) return; const c=SND.ctx, t=c.currentTime; const g=tr.g.gain; g.cancelScheduledValues(t); g.setValueAtTime(Math.max(0.0001,g.value),t); g.linearRampToValueAtTime(Math.max(0.0001,v),t+Math.max(0.05,fade));
   clearTimeout(tr.stopT); if(v<=0.001) tr.stopT=setTimeout(()=>{ if(tr.target<=0.001&&tr.src){ try{ tr.src.stop(); }catch(e){} tr.src.disconnect(); tr.src=null; } },(fade+20)*1000); }
