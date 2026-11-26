@@ -4,3 +4,8 @@ android/build/
 *.apk
 *.idsig
 audio-src/
+art-src/*.jpg
+art-src/out/
+art-src/pete/*/*.jpg
+art-src/pete/*/*.png
+art-src/pete/out/

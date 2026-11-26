@@ -253,3 +253,31 @@ img.pix{width:28px;height:28px;image-rendering:pixelated;flex:none}
 .sk7r .ranks{flex:1;min-height:0;overflow:auto}
 .sk7r .buy{flex:none;margin-top:0}
 .sk7body{height:calc(100% - 34px)}
+/* ===== 0.5: Kino-Titel, Intro, Dialog ===== */
+#title{background:none!important}
+#title::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 35%,rgba(0,0,0,.55) 100%);pointer-events:none}
+#logo.v5{background:none!important;-webkit-background-clip:initial!important;color:inherit!important;text-shadow:none!important;letter-spacing:0;position:relative;animation:logoIn 2.4s cubic-bezier(.2,.8,.2,1) both}
+#logo.v5::after{display:none}
+#logo.v5 img{display:block;height:min(30vh,150px);image-rendering:pixelated;filter:drop-shadow(0 0 6px rgba(255,120,40,.55)) drop-shadow(0 0 22px rgba(255,60,20,.35)) drop-shadow(3px 4px 0 rgba(0,0,0,.8));animation:logoGlow 3.2s ease-in-out infinite,logoFlicker 7s steps(1) infinite}
+@keyframes logoIn{0%{opacity:0;transform:scale(1.35);filter:blur(6px)}60%{opacity:1;filter:blur(0)}100%{transform:scale(1)}}
+@keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 5px rgba(255,120,40,.5)) drop-shadow(0 0 18px rgba(255,60,20,.3)) drop-shadow(3px 4px 0 rgba(0,0,0,.8))}50%{filter:drop-shadow(0 0 9px rgba(255,150,60,.8)) drop-shadow(0 0 30px rgba(255,70,20,.5)) drop-shadow(3px 4px 0 rgba(0,0,0,.8))}}
+@keyframes logoFlicker{0%,91%,93%,100%{opacity:1}92%{opacity:.55}}
+#sub{animation:fadeUp 2s 1s both;color:#d8c0a0!important;letter-spacing:4px!important;font-size:11px!important;text-shadow:0 0 8px rgba(255,90,30,.5),1px 1px 0 #000}
+#tmenu{animation:fadeUp 1.6s 1.6s both}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:none}}
+#tmenu button{position:relative;width:250px!important;margin:4px 0;padding:10px 12px!important;font-family:Impact,"Arial Black",sans-serif;font-size:15px!important;letter-spacing:4px!important;color:#f0e0c8;background:linear-gradient(180deg,rgba(70,40,30,.85),rgba(28,14,10,.92))!important;border:1px solid rgba(255,140,60,.35)!important;border-radius:2px!important;box-shadow:inset 0 1px 0 rgba(255,200,150,.15),0 0 0 1px rgba(0,0,0,.7),0 6px 18px rgba(0,0,0,.6);text-shadow:0 0 6px rgba(255,100,40,.6),1px 1px 0 #000;transition:transform .12s,box-shadow .2s}
+#tmenu button::before{content:"";position:absolute;left:8px;top:50%;width:6px;height:6px;margin-top:-3px;background:#ff5a1e;box-shadow:0 0 8px #ff5a1e;transform:rotate(45deg);opacity:.75}
+#tmenu button:active,#tmenu button:hover{transform:scale(1.04);box-shadow:inset 0 1px 0 rgba(255,200,150,.25),0 0 0 1px rgba(255,120,40,.6),0 0 22px rgba(255,80,20,.45)}
+#tver{color:#c8a888;letter-spacing:2px}
+#cine{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;pointer-events:auto}
+#cine.hide{display:none}
+#cinesub{margin-bottom:11vh;max-width:80vw;text-align:center;font-size:clamp(13px,2.4vw,19px);line-height:1.35;color:#fff8e8;text-shadow:0 0 4px #000,1px 1px 0 #000,-1px -1px 0 #000;font-weight:bold}
+#cinesub .who{color:#ffcc66;font-size:.8em;letter-spacing:1px;display:block}
+#cineskip{position:absolute;top:12px;right:14px;font-size:11px;color:rgba(255,255,255,.55);letter-spacing:1px}
+#ngmodal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}
+#ngmodal.hide{display:none}
+#ngmodal .box{background:linear-gradient(180deg,#2a1a14,#140c0a);border:1px solid rgba(255,140,60,.45);padding:16px 22px;box-shadow:0 0 30px rgba(255,80,20,.25);text-align:center;min-width:260px}
+#ngmodal h2{margin:0 0 6px;font-family:Impact,"Arial Black",sans-serif;letter-spacing:3px;color:#ffd8a8}
+#ngmodal p{margin:0 0 12px;color:#e0c8b0;font-size:14px}
+#ngmodal .row{display:flex;gap:10px;justify-content:center}
+#ngmodal button{min-width:110px;padding:9px}
