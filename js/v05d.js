@@ -110,5 +110,5 @@ loop=function(t){ requestAnimationFrame(loop); const dt=Math.min(0.05,(t-last)/1
   catch(err){ console.error(err); if(!G.errShown){ G.errShown=true; msg('Fehler: '+err.message,'#ff5252'); } } };
 const _toTitle5=toTitle; toTitle=function(){ G.state='title'; $('title').classList.remove('hide'); $('hud').classList.add('hide'); $('t-cont').classList.toggle('hide',!hasSave()); musicMode('titel'); TT.t=0; G.w=null; G.player=null; };
 // Logo + Version
-(function(){ const lg=$('logo'); lg.innerHTML=`<img src="${ART5.logo}" alt="LIFETIME">`; lg.classList.add('v5'); $('tver').textContent='Version 0.5 · Biome'; $('sub').textContent='Überleben. Bauen. Herausfinden, was passiert ist.'; })();
+(function(){ const lg=$('logo'); lg.innerHTML=`<img src="${ART5.logo}" alt="LIFETIME">`; lg.classList.add('v5'); $('tver').textContent='Version 0.5.1 · Biome'; $('sub').textContent='Überleben. Bauen. Herausfinden, was passiert ist.'; })();
 toTitle();
