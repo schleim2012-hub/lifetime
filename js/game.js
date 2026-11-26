@@ -1,6 +1,6 @@
 // Lifetime – Spieler, Gegner, Aktionen, Überleben
 'use strict';
-const INV_N=32, HOT_N=8;
+const INV_N=50, HOT_N=10;
 function newPlayer(x,y){ return {x:x*T+1,y:y*T-40+T,w:14,h:40,vx:0,vy:0,dir:1,onGround:false,canStep:true,hp:100,maxhp:100,hu:100,th:100,stam:100,warm:100,breath:100,xp:0,lvl:1,sp:0,sk:{staerke:0,ausdauer:0,handwerk:0,schuetze:0,pluenderer:0,ueberleben:0},
   inv:new Array(INV_N).fill(null),sel:0,cd:0,walk:0,hurtT:0,spawn:{x,y},fallY:y*T,bonusHp:0,jumps:0,glide:false,attackT:0,inv_t:0}; }
 function maxHp(){ const P=G.player; return 100+P.sk.ausdauer*15+P.bonusHp; }

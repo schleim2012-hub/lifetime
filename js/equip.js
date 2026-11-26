@@ -44,7 +44,7 @@ const _drawPlayerOrig=drawPlayer;
 drawPlayer=function(ox,oy){ const P=G.player; if(P.dead) return; const a=armorStats(); const x=P.x+P.w/2+ox, y=P.y+P.h+oy;
   if(P.inv_t>0&&((G.clock*20)|0)%2) return;
   if(a.wings){ const f=Math.sin(G.clock*(P.onGround?2:14))*3; const bx=x-(P.dir>0?10:-2); px(ctx,'#2a2018',bx-1,y-34-f,10,14); px(ctx,'#7a6a5a',bx,y-33-f,8,12); px(ctx,'#9a8a7a',bx,y-33-f,8,2); }
-  const fr=frameFor(P,true); const it=heldItem(); const show=it&&(P.attackT>0||it==='fackel'||(ITEMS[it]&&(ITEMS[it].type==='tool'||ITEMS[it].type==='weapon'||ITEMS[it].type==='gun'||ITEMS[it].type==='bow')));
+  const fr=frameFor(P,true); const it=heldItem(); const show=it&&!P.swing&&(P.attackT>0||it==='fackel'||(ITEMS[it]&&(ITEMS[it].type==='tool'||ITEMS[it].type==='weapon'||ITEMS[it].type==='gun'||ITEMS[it].type==='bow')));
   drawSprite(ctx,playerLook(),fr,x,y,P.dir,{held:show?it:null,flash:P.hurtT>0}); };
 // Glücksbringer & Kleidungs-Drops von Gegnern
 const _killMobEq=killMob;

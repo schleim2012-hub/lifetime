@@ -127,7 +127,7 @@ function updateMob(e,dt){ const d=MOBS[e.t]; const P=G.player; e.cd-=dt; e.hurtT
     if(td<(d.w/2+8+(tgt.w/2))&&Math.abs(dy)<d.h&&e.atk<=0||(td<e.w/2+14&&(e.atk||0)<=0)){ e.atk=1.0; const dmg=d.dmg*mult*(e.dmgMul||1); if(tgt===P) hurtPlayer(dmg,e); else npcHurt(tgt,dmg); if(e.lunge>0&&d.charge){ tgt.vx=(tgt.vx||0)*2.2; tgt.vy=-240; e.lunge=0; G.cam.shake=Math.max(G.cam.shake,6); sfx('thud'); } }
     e.atk=(e.atk||0)-dt;
     // Blöcke einreißen, wenn blockiert
-    if(e.hitWall&&!d.fly){ e.stuck+=dt; if(e.stuck>0.5&&d.spider){ e.vy=-130; } if(e.stuck>(d.human?99:0.9)){ const fx=Math.floor((e.x+e.w/2)/T)+e.hitWall; const ys=[Math.floor((e.y+e.h-1)/T),Math.floor((e.y+e.h-17)/T),Math.floor((e.y+e.h-33)/T)]; for(const yy of ys){ const t=tget(fx,yy); if(t&&TILES[t].s){ if(TILES[t].door&&d.human){ continue; } e.bang=(e.bang||0)-dt; if(e.bang<=0){ e.bang=1; dmgTile(fx,yy,(d.dmg*mult)*(d.mutant?3:1)); sfx('hit'); } break; } } } }
+    if(e.hitWall&&!d.fly){ e.stuck+=dt; if(e.stuck>0.5&&d.spider){ e.vy=-130; } if(e.stuck>(d.human?99:0.9)){ const fx=Math.floor((e.x+e.w/2)/T)+e.hitWall; const ys=[Math.floor((e.y+e.h-1)/T),Math.floor((e.y+e.h-17)/T),Math.floor((e.y+e.h-33)/T)]; for(const yy of ys){ const t=tget(fx,yy); if(t&&TILES[t].s){ if(TILES[t].door&&d.human){ continue; } e.bang=(e.bang||0)-dt; if(e.bang<=0){ e.bang=1; doorBang(e,fx,yy,(d.dmg*mult)*(d.mutant?3:1)); } break; } } } }
     else e.stuck=0;
     // Graben nach unten / oben
     if(dy<-2*T&&e.onGround&&Math.abs(dx)<2*T&&e.cd<=0&&!d.fly){ e.vy=-300; e.cd=1; }
@@ -208,9 +208,9 @@ function updateProj(dt){ const P=G.player;
     const tx=Math.floor(p.x/T), ty=Math.floor(p.y/T); const t=tget(tx,ty);
     const hitTile=TILES[t].s&&!(TILES[t].glass&&p.type==='bullet');
     if(TILES[t].glass&&p.type==='bullet'&&p.own==='p'){ breakTile(tx,ty,false); }
-    if(hitTile||p.life<=0){ if(p.type==='rohrbombe') explode(p.x,p.y,2.5,ITEMS.rohrbombe.dmg,'p'); else if(p.type==='molotow') fireArea(p.x,p.y-4); else if(p.type==='egg'){ if(G.ents.filter(e=>!e.dead&&e.t==='geier').length<8) G.ents.push(Object.assign(makeMob('geier',tx,ty-1,{spawned:true}),{})); partBurst(p.x,p.y,'#eee',5); } else if(p.type==='arrow'&&Math.random()<0.5&&p.own==='p') spawnDrop('pfeil',1,p.x,p.y-8); else partBurst(p.x,p.y,'#ccc',2,60); p.life=-1; continue; }
+    if(hitTile||p.life<=0){ if(p.type==='rohrbombe') explode(p.x,p.y,2.5,ITEMS.rohrbombe.dmg,'p'); else if(p.type==='molotow') fireArea(p.x,p.y-4); else if(p.type==='egg'){ if(G.ents.filter(e=>!e.dead&&e.t==='geier').length<8) G.ents.push(Object.assign(makeMob('geier',tx,ty-1,{spawned:true}),{})); partBurst(p.x,p.y,'#eee',5); } else if(p.type==='arrow'&&Math.random()<0.5&&p.own==='p') spawnDrop('pfeil',1,p.x,p.y-8); else if(p.back&&p.own==='p'&&Math.random()<p.back) spawnDrop(p.type,1,p.x-p.vx*0.02,p.y-8); else partBurst(p.x,p.y,'#ccc',2,60); p.life=-1; continue; }
     if(p.own==='e'){ if(p.x>P.x&&p.x<P.x+P.w&&p.y>P.y&&p.y<P.y+P.h){ hurtPlayer(p.dmg,{x:p.x-p.vx}); if(p.type==='acid') partBurst(p.x,p.y,'#9c3',6); p.life=-1; continue; } for(const n of G.ents){ if(n.kind==='npc'&&n.recruited&&!n.down&&p.x>n.x&&p.x<n.x+n.w&&p.y>n.y&&p.y<n.y+n.h){ npcHurt(n,p.dmg); p.life=-1; break; } } }
-    else { for(const e of G.ents){ if(e.dead||e.kind!=='mob') continue; const md=MOBS[e.t]; if(!(hostile(e)||md.animal||md.cann)) continue; if(p.own==='n'&&!hostile(e)) continue; if(p.x>e.x-2&&p.x<e.x+e.w+2&&p.y>e.y-2&&p.y<e.y+e.h+2){ if(p.type==='rohrbombe'){ explode(p.x,p.y,2.5,ITEMS.rohrbombe.dmg,'p'); } else if(p.type==='molotow') fireArea(p.x,p.y); else hurtMob(e,p.dmg,p.own==='p'?P:null,70); p.life=-1; break; } } }
+    else { for(const e of G.ents){ if(e.dead||e.kind!=='mob') continue; const md=MOBS[e.t]; if(!(hostile(e)||md.animal||md.cann)) continue; if(p.own==='n'&&!hostile(e)) continue; if(p.x>e.x-2&&p.x<e.x+e.w+2&&p.y>e.y-2&&p.y<e.y+e.h+2){ if(p.type==='rohrbombe'){ explode(p.x,p.y,2.5,ITEMS.rohrbombe.dmg,'p'); } else if(p.type==='molotow') fireArea(p.x,p.y); else { hurtMob(e,p.dmg,p.own==='p'?P:null,p.spin?110:70); if(p.back&&Math.random()<p.back*0.6) spawnDrop(p.type,1,e.x+e.w/2,e.y+e.h-10); } p.life=-1; break; } } }
   }
   G.proj=G.proj.filter(p=>p.life>0);
   // Feuerflächen
@@ -241,7 +241,7 @@ function update(dt){ G.clock+=dt; updateTime(dt); updatePlayer(dt); survival(dt)
   G.cam.x=Math.max(0,Math.min(G.w.W*T-G.VW,G.cam.x)); G.cam.y=Math.max(0,Math.min(G.w.H*T-G.VH,G.cam.y));
   if(G.cam.shake>0) G.cam.shake=Math.max(0,G.cam.shake-dt*15);
   // Musik
-  const under=Math.floor(P.y/T)>G.w.sky[Math.floor(P.x/T)]+14; if(G.ents.some(e=>!e.dead&&e.kind==='mob'&&!e.sleep&&hostile(e)&&Math.abs(e.x-P.x)<9*T&&Math.abs(e.y-P.y)<5*T)) G.combatT=5; else G.combatT=(G.combatT||0)-dt;
+  const under=Math.floor(P.y/T)>G.w.sky[Math.floor(P.x/T)]+14; if(G.ents.some(e=>!e.dead&&e.kind==='mob'&&!e.sleep&&hostile(e)&&Math.abs(e.x-P.x)<5*T&&Math.abs(e.y-P.y)<3*T)||G.fightT>0) G.combatT=4.5; else G.combatT=(G.combatT||0)-dt; G.fightT=(G.fightT||0)-dt;
   musicMode(G.boss&&!G.boss.dead?'boss':G.bloodmoon?'blut':G.combatT>0?'kampf':under?'hoehle':isNight()?'nacht':'tag');
   G.autosave=(G.autosave||0)+dt; if(G.autosave>120){ G.autosave=0; saveGame(true); }
 }
