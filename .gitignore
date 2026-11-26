@@ -1,0 +1,5 @@
+shots/
+node_modules/
+android/build/
+*.apk
+*.idsig

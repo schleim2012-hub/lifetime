@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#120a08"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>Lifetime</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<canvas id="c"></canvas>
+<div id="hud" class="hide">
+  <div id="bars">
+    <div class="bar" id="b-hp"><i></i><span>❤</span></div>
+    <div class="bar" id="b-hu"><i></i><span>🍖</span></div>
+    <div class="bar" id="b-th"><i></i><span>💧</span></div>
+    <div class="bar" id="b-st"><i></i><span>⚡</span></div>
+    <div class="bar" id="b-wa"><i></i><span>🌡</span></div>
+    <div class="bar" id="b-br"><i></i><span>🫧</span></div>
+    <div id="xpline"><i></i></div>
+  </div>
+  <div id="hot"></div>
+  <div id="topr"><div id="clock">Tag 1 · 06:00</div><div id="bmc"></div>
+    <div class="tbtn" id="btn-inv" title="Rucksack">🎒</div><div class="tbtn" id="btn-map" title="Karte">🗺</div><div class="tbtn" id="btn-menu" title="Menü">☰</div></div>
+  <div id="msgs"></div>
+  <div id="bossbar" class="hide"><div id="bossname"></div><div id="bosshp"><i></i></div></div>
+  <div id="stick"><div id="knob"></div></div>
+  <div id="btns">
+    <div class="cbtn" id="btn-e"><b>✋</b><small id="e-lbl">Benutzen</small></div>
+    <div class="cbtn big" id="btn-a"><b>⚒</b><small id="a-lbl">Aktion</small></div>
+    <div class="cbtn big" id="btn-j"><b>⤒</b><small>Springen</small></div>
+  </div>
+</div>
+<div id="panel" class="hide"><div id="ptabs"></div><div id="pbody"></div><div id="pclose">✕</div></div>
+<div id="title"><div id="logo">LIFETIME</div><div id="sub">Überleben. Bauen. Herausfinden, was passiert ist.</div>
+  <div id="tmenu">
+    <button id="t-cont" class="hide">Weiterspielen</button>
+    <button id="t-new">Neues Spiel</button>
+    <button id="t-help">Anleitung</button>
+    <button id="t-opt">Optionen</button>
+  </div><div id="tver">Version 0.1 · erste spielbare Fassung</div></div>
+<div id="intro" class="hide"><div id="introtxt"></div><button id="introskip">Weiter ›</button></div>
+<div id="rot" class="hide"><div>📱↻<br>Bitte das Handy quer halten.<br><button id="rot-ok">Trotzdem spielen</button></div></div>
+<div id="fade"></div>
+<script src="js/data.js"></script><script src="js/gfx.js"></script><script src="js/world.js"></script><script src="js/audio.js"></script>
+<script src="js/core.js"></script><script src="js/game.js"></script><script src="js/ai.js"></script><script src="js/render.js"></script>
+<script src="js/ui.js"></script><script src="js/main.js"></script>
+</body></html>
