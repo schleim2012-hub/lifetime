@@ -18,6 +18,8 @@ public class MainActivity extends Activity {
     s.setJavaScriptEnabled(true);
     s.setDomStorageEnabled(true);
     s.setAllowFileAccess(true);
+    s.setAllowFileAccessFromFileURLs(true);
+    s.setMediaPlaybackRequiresUserGesture(false);
     s.setMediaPlaybackRequiresUserGesture(false);
     web.setWebViewClient(new WebViewClient());
     setContentView(web);

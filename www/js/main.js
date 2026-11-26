@@ -65,7 +65,7 @@ function setupInput(){
     if(G.state!=='play') return; if(k==='escape'){ if(!$('panel').classList.contains('hide')) UI.close(); else UI.open('menu'); }
     if(G.paused) { if(k==='i'||k==='tab'){ e.preventDefault(); UI.close(); } return; }
     if(k===' '||k==='w'){ INPUT.jump=true; INPUT.jumpPressed=true; } if(k==='e') doInteract(); if(k==='i'||k==='tab'){ e.preventDefault(); UI.open('inv'); } if(k==='m') UI.open('map'); if(k==='f'){ INPUT.act=true; INPUT.actFresh=true; }
-    if(k>='1'&&k<='8'){ G.player.sel=+k-1; UI.refreshHot(); } keyAxis(); });
+    if(k>='0'&&k<='9'){ G.player.sel=k==='0'?9:+k-1; UI.refreshHot(); } keyAxis(); });
   addEventListener('keyup',e=>{ const k=e.key.toLowerCase(); INPUT.keys[k]=false; if(k===' '||k==='w') INPUT.jump=false; if(k==='f') INPUT.act=false; keyAxis(); });
   addEventListener('wheel',e=>{ if(G.state==='play'&&!G.paused){ G.player.sel=(G.player.sel+(e.deltaY>0?1:-1)+HOT_N)%HOT_N; UI.refreshHot(); } });
   function keyAxis(){ const K=INPUT.keys; if(K.a||K.d||K.arrowleft||K.arrowright||K.s||K.arrowdown) { INPUT.jx=(K.d||K.arrowright?1:0)-(K.a||K.arrowleft?1:0); INPUT.jy=(K.s||K.arrowdown?1:0); INPUT.kb=true; } else if(INPUT.kb){ INPUT.jx=0; INPUT.jy=0; INPUT.kb=false; } }

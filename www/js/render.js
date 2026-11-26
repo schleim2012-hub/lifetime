@@ -5,15 +5,13 @@ function drawEnt(e,ox,oy){ const x=e.x+e.w/2+ox, y=e.y+e.h+oy; const dir=e.dir||
     const top=y-(an.ay-an.top)-4; if(e.down){ ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(x-8,top,16,3); }
     if(e.recruited){ ctx.fillStyle='#000'; ctx.fillRect(x-2,top-4,5,5); ctx.fillStyle='#69f0ae'; ctx.fillRect(x-1,top-3,3,3); } else { ctx.fillStyle='#000'; ctx.fillRect(x-2,top-8,4,8); ctx.fillStyle='#ffd54f'; ctx.fillRect(x-1,top-7,2,4); ctx.fillRect(x-1,top-2,2,1);} return; }
   const d=MOBS[e.t]; if(!d) return;
-  let held=null; if(d.gang) held=d.chainsaw?'kettensaege':d.gun?'schrotflinte':'machete'; if(d.cann&&G.cannAngry>0) held='speer';
+  let held=null; if(d.gang) held=d.chainsaw?'kettensaege':d.gun?'schrotflinte':'machete'; if(d.cann) held=e.wpn||'speer';
   const fr=e.sleep?'i':frameFor(e,false);
-  const an=drawSprite(ctx,e.t,e.vomitT>0?'a2':fr,x,y,dir,{held,flash,rad:e.rad,alpha:e.sleep?0.9:null,tilt:e.stagger>0?-0.28*(e.stagger/(e.stagT||0.28)):(MOBS[e.t].zombie&&!MOBS[e.t].fly?Math.sin(G.clock*2+e.x*0.1)*0.04:0)});
+  const an=drawSprite(ctx,e.look||e.t,e.vomitT>0?'a2':fr,x,y,dir,{held,flash,rad:e.rad,alpha:e.sleep?0.9:null,tilt:e.stagger>0?-0.28*(e.stagger/(e.stagT||0.28)):(MOBS[e.t].zombie&&!MOBS[e.t].fly?Math.sin(G.clock*2+e.x*0.1)*0.04:0)});
   const top=y-(an.ay-an.top);
   if(e.rad){ ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=0.35+Math.sin(G.clock*6)*0.1; ctx.drawImage(LOOK.glow.blue,x-20,y-e.h/2-20-6,40,40); ctx.restore(); }
   if(d.cann&&e.watch&&G.cannAngry<=0){ ctx.fillStyle='#000'; ctx.fillRect(x-2,top-10,4,8); ctx.fillStyle='#fff'; ctx.fillRect(x-1,top-9,2,4); ctx.fillRect(x-1,top-4,2,1); }
   if(e.sleep){ ctx.fillStyle='#cfd8dc'; ctx.font='7px monospace'; ctx.fillText('z',x+4,top-2+Math.sin(G.clock*2)*2); ctx.fillText('z',x+8,top-7+Math.sin(G.clock*2+1)*2); }
-  if(e.hp<e.maxhp&&!d.boss){ ctx.fillStyle='#000'; ctx.fillRect(x-9,top-6,18,4); ctx.fillStyle='#4a0000'; ctx.fillRect(x-8,top-5,16,2); ctx.fillStyle=e.rad?'#76ff03':'#e53935'; ctx.fillRect(x-8,top-5,Math.round(16*Math.max(0,e.hp/e.maxhp)),2); }
-  if(d.mutant&&!e.sleep){ ctx.font='bold 6px monospace'; ctx.textAlign='center'; ctx.fillStyle='#000'; ctx.fillText(d.n,x+1,top-8); ctx.fillStyle='#e040fb'; ctx.fillText(d.n,x,top-9); ctx.textAlign='left'; }
 }
 function drawDog(x,y,dir,w,c){ const l=Math.sin(w*1.4)*2; px(ctx,c,x-8,y-10,15,6); px(ctx,c,x+(dir>0?5:-11),y-14,6,6); px(ctx,'#c22',x+(dir>0?8:-9),y-12,2,1); px(ctx,shade(c,0.7),x-7+l,y-4,2,4); px(ctx,shade(c,0.7),x+4-l,y-4,2,4); px(ctx,c,x+(dir>0?-10:8),y-11,3,2); px(ctx,'#8a0000',x-2,y-9,3,2); }
 function drawBird(x,y,dir,w,c,s){ const f=Math.sin(w)*4*s; px(ctx,c,x-4*s,y-6*s,9*s,4*s); px(ctx,'#c9a',x+(dir>0?4:-6)*s,y-8*s,3*s,3*s); px(ctx,'#da3',x+(dir>0?7:-8)*s,y-7*s,2*s,1*s); px(ctx,shade(c,1.3),x-8*s,y-6*s-f,8*s,2*s); px(ctx,shade(c,1.3),x+1*s,y-6*s-f,8*s,2*s); }

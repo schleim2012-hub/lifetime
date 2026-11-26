@@ -1,0 +1,6 @@
+const pw=require('/usr/local/lib/pnpm/5/.pnpm/playwright-core@1.59.1/node_modules/playwright-core');
+(async()=>{ const b=await pw.chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']}); const ctx=await b.newContext({viewport:{width:915,height:412},deviceScaleFactor:2.625,isMobile:true,hasTouch:true}); const p=await ctx.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+ await p.goto('http://localhost:18611/index.html'); await p.waitForTimeout(1500); await p.tap('#t-new'); for(let i=0;i<5;i++){ await p.waitForTimeout(120); await p.tap('#introskip').catch(()=>{}); } await p.waitForTimeout(1200);
+ await p.evaluate(()=>{ G.time=0.9; G.day=3; G.cometNight=3; G.ents=G.ents.filter(e=>e.kind!=='mob'); cometLaunch(); console.log(G.VW,G.VH); });
+ for(const t of [700,1400,2000]){ await p.waitForTimeout(t===700?700:t===1400?700:600); await p.evaluate(()=>{ const P=G.player; P.hp=maxHp(); }); await p.screenshot({path:`/workspace/lifetime/shots/v04/11_comet_${t}.png`}); }
+ await p.waitForTimeout(900); await p.screenshot({path:'/workspace/lifetime/shots/v04/12_comet_impact.png'}); console.log(errs, await p.evaluate(()=>[G.VW,G.VH,JSON.stringify(G.flags.comet)])); await b.close(); })();
