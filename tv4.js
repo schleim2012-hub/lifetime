@@ -14,7 +14,7 @@ const D='/workspace/lifetime/shots/v04/';
  console.log('fps',fps,'furn',await p.evaluate(()=>{ let n=0; for(const t of G.w.tiles) if(TILES[t]&&TILES[t].furn) n++; return n; }));
  const heal=()=>p.evaluate(()=>{ const P=G.player; P.fallY=P.y; P.hp=maxHp(); P.hu=100; P.th=100; P.st=100; P.stam=100; });
  console.log('errs so far',errs);
- if(ONLY==='quick'){ await b.close(); return; }
+ if(ONLY==='quick'){ await p.waitForTimeout(2500); console.log(await p.evaluate(()=>Object.keys(MUSX.tr).map(k=>[k,!!MUSX.tr[k].src,MUSX.tr[k].lp,MUSX.tr[k].g&&MUSX.tr[k].g.gain.value.toFixed(2)]))); console.log(errs); await b.close(); return; }
  const go=async(src)=>{ await p.evaluate(src); };
  // Haus mit Möbeln
  const house=await p.evaluate(()=>{ const w=G.w; let best=null,bn=0; for(let x=30;x<w.W-30;x+=4){ let n=0; for(let y=0;y<w.H;y++) for(let a=0;a<12;a++){ const t=tget(x+a,y); if(TILES[t]&&TILES[t].furn) n++; } if(n>bn){ bn=n; best=x; } } if(best==null) return null; let y=0; for(let yy=0;yy<w.H;yy++){ const t=tget(best+5,yy); if(TILES[t]&&TILES[t].furn){ y=yy; break; } } const P=G.player; P.x=(best+5)*T; P.y=(y-1)*T; P.vy=0; P.fallY=P.y; G.cam.x=P.x-G.VW/2; G.cam.y=P.y-G.VH/2; return [best,y,bn]; });
