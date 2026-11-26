@@ -60,7 +60,7 @@ function newDay(){ G.day++; G.stats.days++; if(G.cannAngry>0) { G.cannAngry--; i
   saveGame(true); }
 function updateTime(dt){ const before=hour(); G.time+=dt/DAYLEN; if(G.time>=1){ G.time-=1; newDay(); } const h=hour();
   const bmDay=G.day%7===0; 
-  if(!G.bloodmoon&&bmDay&&h>=20&&h<23.9&&before<20){ G.bloodmoon=true; G.bmSpawned=0; G.bmKills=0; msg('BLUTMOND! Die Horde kommt!','#ff1744'); sfx('scream'); G.cam.shake=6; }
+  if(!G.bloodmoon&&bmDay&&h>=20&&!G.flags['bm'+G.day]){ G.flags['bm'+G.day]=true; G.bloodmoon=true; G.bmSpawned=0; G.bmKills=0; msg('BLUTMOND! Die Horde kommt!','#ff1744'); sfx('scream'); G.cam.shake=6; }
   if(G.bloodmoon&&h>=5&&h<12){ G.bloodmoon=false; msg('Du hast den Blutmond überlebt!','#69f0ae'); gainXP(150+G.day*10); sfx('level'); for(const e of G.ents) if(e.bm&&!e.dead){ e.bm=false; } }
   if(bmDay&&h>=18&&h<20&&!G.flags['bmwarn'+G.day]){ G.flags['bmwarn'+G.day]=true; msg('Der Himmel färbt sich rot … heute Nacht ist Blutmond!','#ff5252'); }
 }

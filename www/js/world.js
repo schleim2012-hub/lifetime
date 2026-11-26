@@ -172,7 +172,7 @@ function genWorld(seed){
     if(s.type==='stadt'){ const gy=hs[s.x0+5]; flatten(s.x0,s.x1,gy); feat.city={x0:s.x0,x1:s.x1,y:gy};
       for(let i=s.x0;i<s.x1;i++){ set(i,gy,33); set(i,gy+1,11);} 
       let hx=s.x0+6; let n=0; const plan=[]; while(hx<s.x1-26){ const w=ri(14,22); plan.push({hx,w}); hx+=w+ri(5,10); }
-      const stashI=ri(1,Math.max(1,plan.length-2)); const kioskI=ri(0,plan.length-1);
+      const stashI=ri(1,Math.max(1,plan.length-2)); let kioskI=ri(0,plan.length-1); if(kioskI===stashI) kioskI=stashI===0?1:0;
       const npcT=['brems','willi']; let ni=0;
       plan.forEach((p,i)=>{
         if(i===kioskI){ // Kiosk (kleiner Laden)

@@ -19,6 +19,7 @@ html,body{margin:0;height:100%;background:#120a08;overflow:hidden;font-family:"T
 .slot.pick{border-color:#69f0ae}
 .slot .k{position:absolute;left:2px;top:0;font-size:8px;opacity:.5}
 #topr{position:absolute;right:calc(8px + env(safe-area-inset-right));top:4px;display:flex;align-items:center;gap:5px}
+#clockbox{position:absolute;right:calc(8px + env(safe-area-inset-right));top:44px;display:flex;flex-direction:column;align-items:flex-end;gap:2px;pointer-events:none}
 #clock{font-size:12px;background:rgba(0,0,0,.5);padding:3px 7px;border-radius:5px;font-weight:bold}
 #bmc{font-size:11px;color:#ff8a80;background:rgba(0,0,0,.5);padding:3px 6px;border-radius:5px}
 .tbtn{width:36px;height:36px;border-radius:8px;background:rgba(30,18,12,.75);border:2px solid #6a4a35;font-size:19px;display:flex;align-items:center;justify-content:center}
