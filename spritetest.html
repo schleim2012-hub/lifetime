@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><body style="margin:0;background:#3a6ea5"><canvas id="c" width="1400" height="900" style="image-rendering:pixelated"></canvas>
+<script src="www/js/data.js"></script><script src="www/js/gfx.js"></script><script src="www/js/sprites.js"></script>
+<script>
+buildTileTex(); buildIcons();
+const g=document.getElementById('c').getContext('2d'); g.imageSmoothingEnabled=false; g.scale(3,3); g.imageSmoothingEnabled=false;
+const ids=Object.keys(LOOKS).concat(Object.keys(CREATURES)); let i=0;
+for(const id of ids){ const col=i%14, row=Math.floor(i/14); const x=col*33+16, y=row*75+70; drawSprite(g,id,(i%3===0?'w2':i%3===1?'i':'a1'),x,y,1,{held:id==='player'?'steinaxt':null}); g.fillStyle='#fff'; g.font='5px sans-serif'; g.fillText(id,x-15,y+6); i++; }
+// Laufzyklus Spieler
+for(let k=0;k<8;k++){ drawSprite(g,'player','w'+k,20+k*30,290,1,{}); drawSprite(g,'player','w'+k,20+k*30,290+0,1,{}); }
+for(let k=0;k<4;k++) drawSprite(g,'player','a'+k,270+k*30,290,1,{held:'steinaxt'});
+drawSprite(g,'player','w2',400,290,-1,{held:'steinaxt'}); drawSprite(g,'player','j',430,290,1,{});
+</script></body></html>

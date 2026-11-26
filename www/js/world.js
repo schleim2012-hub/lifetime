@@ -44,16 +44,24 @@ function genWorld(seed){
   // ---- Höhlen (Würmer) ----
   const carve=(cx,cy,r)=>{ for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){ if(a*a+b*b<=r*r+0.5){ const X=Math.round(cx+a),Y=Math.round(cy+b); if(inb(X,Y)&&Y<H-4&&get(X,Y)!==17) set(X,Y,0);} } };
   for(let k=0;k<70;k++){
-    let cx=ri(40,W-40), cy=ri(base+15,H-20); let ang=R()*Math.PI*2; const len=ri(40,140); let r=ri(1,2)+R();
+    let cx=ri(40,W-40), cy=ri(base+15,H-20); let ang=R()*Math.PI*2; const len=ri(40,140); let r=ri(1,2)+R()+0.4;
     const s=segAt(cx); if(s.type==='stadt'&&cy<base+25) cy+=25;
-    for(let j=0;j<len;j++){ carve(cx,cy,r); ang+=(R()-0.5)*0.5; cx+=Math.cos(ang); cy+=Math.sin(ang)*0.6; r=Math.max(1.2,Math.min(3.2,r+(R()-0.5)*0.3)); if(cy<base+10) ang=Math.abs(ang); if(cy>H-10) ang=-Math.abs(ang); }
+    for(let j=0;j<len;j++){ carve(cx,cy,r); ang+=(R()-0.5)*0.5; cx+=Math.cos(ang); cy+=Math.sin(ang)*0.6; r=Math.max(1.7,Math.min(3.4,r+(R()-0.5)*0.3)); if(cy<base+10) ang=Math.abs(ang); if(cy>H-10) ang=-Math.abs(ang); }
   }
   // Höhleneingänge im Wald
-  for(let k=0;k<5;k++){ const s=segs.filter(s=>s.type.startsWith('wald'))[ri(0,2)]; if(!s) continue; let cx=ri(s.x0+10,s.x1-10), cy=hs[cx]-1; let ang=Math.PI/2+(R()-0.5); for(let j=0;j<ri(25,45);j++){ carve(cx,cy,1.6); ang+=(R()-0.5)*0.4; cx+=Math.cos(ang)*0.8; cy+=Math.abs(Math.sin(ang)); } }
+  for(let k=0;k<5;k++){ const s=segs.filter(s=>s.type.startsWith('wald'))[ri(0,2)]; if(!s) continue; let cx=ri(s.x0+10,s.x1-10), cy=hs[cx]-1; let ang=Math.PI/2+(R()-0.5); for(let j=0;j<ri(25,45);j++){ carve(cx,cy,2); ang+=(R()-0.5)*0.4; cx+=Math.cos(ang)*0.8; cy+=Math.abs(Math.sin(ang)); } }
   // Mutanten-Höhlen (große Räume tief unten)
   for(let k=0;k<3;k++){ const cx=ri(80,W-80), cy=ri(170,205); for(let a=-12;a<=12;a++)for(let b=-5;b<=4;b++){ if((a*a)/144+(b*b)/25<1) set(cx+a,cy+b,0);} for(let a=-12;a<=12;a++){ for(let b=4;b<8;b++) if(get(cx+a,cy+b)===0) set(cx+a,cy+b,3);} for(let j=0;j<6;j++) set(cx+ri(-10,10),cy+4,39);
     feat.lairs.push({x:cx,y:cy+4}); ents.push({k:'mob',t:['doppelkopf','armige','spinnenfrau'][k],x:cx,y:cy+3,sleep:true});
     set(cx-6,cy+3,21); set(cx+6,cy+3,21); }
+  // Pilz-Biom (blau leuchtend)
+  { const mx=ri(150,W-200), my=ri(125,150); feat.shroom={x0:mx-35,x1:mx+35,y:my};
+    for(let k=0;k<5;k++){ let cx2=mx-30+k*12, cy2=my+ri(-8,8); for(let j=0;j<20;j++){ carve(cx2,cy2,2.4); cx2+=1.2; cy2+=(R()-0.5)*1.5; } }
+    for(let x=mx-38;x<mx+38;x++) for(let y=my-22;y<my+24;y++){ const t=get(x,y); if(t===3||t===1||t===46||t===14||t===16) { set(x,y,56); setbg(x,y,5); } }
+    for(let x=mx-38;x<mx+38;x++) for(let y=my-22;y<my+24;y++){ if(get(x,y)===56&&get(x,y-1)===0){ set(x,y,54); if(R()<0.3&&get(x,y-2)===0) set(x,y-1,55); } } }
+  // Tropfsteine und Ranken
+  for(let x=4;x<W-4;x++) for(let y=hs[x]+6;y<H-6;y++){ const t=get(x,y); if(t!==0) continue; const up=get(x,y-1);
+    if((up===3||up===56)&&get(x,y+1)===0&&get(x,y+2)===0){ const r=R(); if(r<0.07) set(x,y,52); else if(r<0.1){ const L=ri(2,6); for(let k=0;k<L&&get(x,y+k)===0;k++) set(x,y+k,53); } } }
   // Boden unten
   for(let i=0;i<W;i++) for(let y=H-3;y<H;y++) set(i,y,17);
   for(let y=0;y<H;y++){ for(let i=0;i<3;i++){ set(i,y,17); set(W-1-i,y,17);} }
@@ -62,8 +70,12 @@ function genWorld(seed){
     // Ufer sand
     for(let i=L.x0-4;i<L.x1+4;i++){ if(get(i,hs[i])===2) set(i,hs[i],4); } }
   // ---- Bäume, Büsche ----
-  const tree=(tx)=>{ const h=hs[tx]; if(get(tx,h)!==2||get(tx,h-1)!==0) return; const th=ri(6,12); for(let y=1;y<=th;y++) set(tx,h-y,6); const top=h-th; const rr=ri(2,3);
-    for(let a=-rr-1;a<=rr+1;a++)for(let b=-rr-1;b<=rr;b++){ if(a*a+b*b*1.4<=(rr+1)*(rr+1)&&get(tx+a,top+b)===0) set(tx+a,top+b,7);} set(tx,top,6); };
+  const tree=(tx)=>{ const h=hs[tx]; if(get(tx,h)!==2||get(tx,h-1)!==0) return; const r=R(); const kind=r<0.58?7:r<0.72?51:r<0.86?50:49;
+    if(kind===51){ const th=ri(7,11); for(let y=1;y<=th;y++) set(tx,h-y,6); const top=h-th-1; for(let k=0;k<th-2;k++){ const hw=Math.min(3,1+Math.floor(k/3)) - (k%3===0&&k>2?1:0); for(let a=-hw;a<=hw;a++){ if(a===0&&k>0) continue; if(get(tx+a,top+k)===0) set(tx+a,top+k,51);} } set(tx,top,51); set(tx,top-1,51); return; }
+    const th=ri(5,9); for(let y=1;y<=th;y++) set(tx,h-y,6); const top=h-th; const rr=ri(2,3);
+    for(let a=-rr-1;a<=rr+1;a++)for(let b=-rr-1;b<=rr;b++){ if(a*a+b*b*1.4<=(rr+1)*(rr+1)&&get(tx+a,top+b)===0) set(tx+a,top+b,kind);} set(tx,top,6);
+    // seitliche Astbüschel
+    for(let y=top+rr+2;y<h-2;y++){ if(R()<0.22){ const sd=R()<0.5?-1:1; if(get(tx+sd,y)===0) set(tx+sd,y,kind); y+=2; } } };
   for(const s of segs){ if(!s.type.startsWith('wald')&&s.type!=='kann'&&s.type!=='see') continue;
     let tx=s.x0+ri(1,4); while(tx<s.x1-2){ if(s.type==='see'&&feat.lake&&tx>feat.lake.x0+3&&tx<feat.lake.x1-3){ tx+=3; continue; } const r=R(); const h=hs[tx];
       if(r<0.55) tree(tx); else if(r<0.7){ if(get(tx,h-1)===0) set(tx,h-1,31);} else if(r<0.85){ if(get(tx,h-1)===0) set(tx,h-1,35);} else if(get(tx,h-1)===0) set(tx,h-1,36);
@@ -71,7 +83,7 @@ function genWorld(seed){
   // ---- Strukturhilfen ----
   const flatten=(x0,x1,lv)=>{ for(let i=x0;i<=x1;i++){ for(let y=lv-30;y<lv;y++){ if(get(i,y)!==17){ set(i,y,0); setbg(i,y,0);} } for(let y=lv;y<lv+4;y++){ if(get(i,y)===0||get(i,y)===5||get(i,y)===6||get(i,y)===7) set(i,y,y===lv?2:1);} } };
   const box=(x0,y0,x1,y1,t)=>{ for(let i=x0;i<=x1;i++)for(let y=y0;y<=y1;y++) set(i,y,t); };
-  const door=(dx,gy)=>{ set(dx,gy-1,19); set(dx,gy-2,19); };
+  const door=(dx,gy)=>{ set(dx,gy-1,19); set(dx,gy-2,19); set(dx,gy-3,19); };
   const npcAt=(id,x,y)=>ents.push({k:'npc',t:id,x,y});
   // ---- Haus ----
   const house=(hx,opts)=>{ opts=opts||{}; const w=opts.w||ri(9,13); const fl=opts.fl||ri(1,2); const gy=hs[hx+(w>>1)]; flatten(hx-1,hx+w,gy);
@@ -86,7 +98,7 @@ function genWorld(seed){
     for(let f=0;f<fl;f++){ const fy=gy-f*fh; if(R()<0.8){ set(hx,fy-3,R()<0.5?12:0); } if(R()<0.8) set(hx+w-1,fy-3,R()<0.4?0:12); }
     // Dach (Giebel)
     for(let k=0;k<=Math.ceil(w/2);k++){ for(let i=hx-1+k;i<=hx+w-k;i++) set(i,top-k,brick?10:8); }
-    door(hx,gy); door(hx+w-1,gy); set(hx,gy-3,wt);
+    door(hx,gy); door(hx+w-1,gy);
     // Einrichtung
     for(let f=0;f<fl;f++){ const fy=gy-f*fh-1; const c=ri(hx+4,hx+w-3); set(c,fy,R()<0.3?43:29); if(R()<0.5) set(hx+w-3,fy,R()<0.5?28:29); if(R()<0.35) set(hx+5,fy,42); if(f==0&&R()<0.3) set(hx+w-2,fy,21);
       if(R()<0.6&&!opts.npc) ents.push({k:'mob',t:ZOMBIE_NAMES[ri(0,4)],x:hx+w/2,y:fy,sleep:true}); }
@@ -107,7 +119,7 @@ function genWorld(seed){
       // Möbel & Beute
       const n=ri(1,3); for(let j=0;j<n;j++){ const lx=ri(hx+4,hx+w-5); if(get(lx,fy-1)===0) set(lx,fy-1,[29,42,43,42][ri(0,3)]); }
       if(R()<0.25){ for(let y=fy-fh+1;y<fy;y++) setbg(hx+(w>>1),y,6); }
-      if(f>0&&R()<0.7) ents.push({k:'mob',t:ZOMBIE_NAMES[ri(0,9)],x:hx+ri(4,w-5),y:fy-1,sleep:true});
+      if(f>0&&R()<0.7) ents.push({k:'mob',t:ZOMBIE_NAMES[ri(0,12)],x:hx+ri(4,w-5),y:fy-1,sleep:true});
       if(R()<0.3) set(hx+ri(3,w-4),fy-3,21);
     }
     door(hx,gy); door(hx+w-1,gy);
@@ -134,8 +146,8 @@ function genWorld(seed){
   for(let i=cx-9;i<=cx+7;i++){ set(i,fy-5,30); set(i,fy,30); }
   for(let i=cx-8;i<=cx+6;i++){ if((i-cx)%3===0) set(i,fy-4,12); }
   for(let y=fy-5;y<=fy;y++) set(cx-9,y,30);
-  for(let y=fy-5;y<=fy-3;y++) set(cx+7,y,30); // vorne aufgerissen (Ausgang)
-  set(cx+8,fy-4,12); set(cx+8,fy-3,30);
+  for(let y=fy-5;y<=fy-4;y++) set(cx+7,y,30); // vorne aufgerissen (Ausgang)
+  set(cx+8,fy-4,12);
   for(let i=cx-8;i<=cx+6;i++) for(let y=fy-4;y<fy;y++){ setbg(i,y,4); if(get(i,y)!==12) set(i,y,0);} 
   for(let i=cx-8;i<=cx+6;i++) if((i-cx)%3===0) set(i,fy-4,12);
   set(cx-7,fy-1,29); set(cx-3,fy-1,29); set(cx+3,fy-1,22);
@@ -154,13 +166,14 @@ function genWorld(seed){
     if(s.type==='wald_haus'){ let hx=s.x0+8; let k=0; while(hx<s.x1-20){ house(hx,{npc:k<2?npcPool[k]:null}); k++; hx+=ri(30,45);} }
     if(s.type==='see'){ house(s.x0+1,{w:9,fl:1,npc:'gerda'}); }
     if(s.type==='camp'){ const gy=hs[s.x0+30]; const a=s.x0+8,b=s.x1-8; flatten(a-2,b+2,gy);
-      for(let y=gy-4;y<gy;y++){ set(a,y,8); set(b,y,8);} door(a,gy); door(b,gy); set(a,gy-3,8); set(b,gy-3,8);
-      for(let i=a;i<=b;i+=2) set(i,gy-5,R()<0.5?27:0);
+      for(let y=gy-5;y<gy;y++){ set(a,y,8); set(b,y,8);} door(a,gy); door(b,gy); set(a,gy-4,8); set(b,gy-4,8);
+      for(let i=a;i<=b;i+=2) set(i,gy-6,R()<0.5?27:0);
       // Zelte
       for(const tx of [a+6,b-14]){ for(let k=0;k<5;k++){ for(let i=tx+k;i<tx+10-k;i++) setbg(i,gy-1-k,7); } }
       set(Math.round((a+b)/2),gy-1,22); set(a+10,gy-1,44); set(b-5,gy-1,44); set(a+3,gy-1,21); set(b-3,gy-1,21); set(b-8,gy-1,28);
       const camp={x0:a,x1:b,y:gy,id:feat.camps.length,name:['Sumpfbrüder-Lager','Lager der Schrottkönige'][feat.camps.length]||'Lager'}; feat.camps.push(camp);
       for(let k=0;k<ri(4,5);k++) ents.push({k:'mob',t:R()<0.55?'hinterwaeldler':'schlaeger',x:ri(a+3,b-3),y:gy-1,camp:camp.id});
+      ents.push({k:'mob',t:'saegesepp',x:Math.round((a+b)/2)+3,y:gy-1,camp:camp.id});
     }
     if(s.type==='kann'){ const c=Math.round((s.x0+s.x1)/2); const gy=hs[c]; flatten(c-24,c+24,gy); feat.cann={x0:c-26,x1:c+26,y:gy};
       for(const hx of [c-20,c-4,c+12]){ // Hütte aus Stämmen und Blättern
@@ -173,7 +186,7 @@ function genWorld(seed){
       for(let i=s.x0;i<s.x1;i++){ set(i,gy,33); set(i,gy+1,11);} 
       let hx=s.x0+6; let n=0; const plan=[]; while(hx<s.x1-26){ const w=ri(14,22); plan.push({hx,w}); hx+=w+ri(5,10); }
       const stashI=ri(1,Math.max(1,plan.length-2)); let kioskI=ri(0,plan.length-1); if(kioskI===stashI) kioskI=stashI===0?1:0;
-      const npcT=['brems','willi']; let ni=0;
+      const npcT=['brems','willi','rudi']; let ni=0;
       plan.forEach((p,i)=>{
         if(i===kioskI){ // Kiosk (kleiner Laden)
           const w=11; for(let a=p.hx;a<p.hx+w;a++){ for(let y=gy-6;y<gy;y++){ set(a,y,0); setbg(a,y,6);} set(a,gy-6,10);} for(let y=gy-6;y<gy;y++){ set(p.hx,y,10); set(p.hx+w-1,y,10);} door(p.hx,gy); door(p.hx+w-1,gy); set(p.hx+3,gy-3,12); set(p.hx+3,gy-4,12);
@@ -191,11 +204,11 @@ function genWorld(seed){
       for(let k=0;k<6;k++){ const ax=ri(s.x0+3,s.x1-8); if(get(ax,gy-1)!==0||get(ax+4,gy-1)!==0) continue; for(let i=ax;i<ax+5;i++) set(i,gy-1,13); set(ax+1,gy-2,13); set(ax+2,gy-2,12); set(ax+3,gy-2,13); }
       for(let k=0;k<20;k++){ const ax=ri(s.x0,s.x1); if(get(ax,gy-1)===0) set(ax,gy-1,34); }
       // Zombies auf der Straße
-      for(let k=0;k<8;k++) ents.push({k:'mob',t:ZOMBIE_NAMES[ri(0,9)],x:ri(s.x0,s.x1),y:gy-1,sleep:R()<0.5});
+      for(let k=0;k<8;k++) ents.push({k:'mob',t:ZOMBIE_NAMES[ri(0,12)],x:ri(s.x0,s.x1),y:gy-1,sleep:R()<0.5});
     }
   }
   // Fehlende NPCs irgendwo im Wald
-  for(const id of ['kalle','gerda','mecki']){ if(!ents.find(e=>e.k==='npc'&&e.t===id)){ const s=segs.find(s=>s.type.startsWith('wald')&&s!==segs[0])||segs[segs.length-1]; const hx=ri(s.x0+5,Math.max(s.x0+6,s.x1-20)); house(hx,{npc:id,fl:1}); } }
+  for(const id of ['kalle','gerda','mecki','doris']){ if(!ents.find(e=>e.k==='npc'&&e.t===id)){ const s=segs.find(s=>s.type.startsWith('wald')&&s!==segs[0])||segs[segs.length-1]; const hx=ri(s.x0+5,Math.max(s.x0+6,s.x1-20)); house(hx,{npc:id,fl:1}); } }
   // Tiere
   for(let k=0;k<35;k++){ const s=segs[ri(0,segs.length-1)]; if(s.type==='stadt') continue; const ax=ri(s.x0,s.x1-1); ents.push({k:'mob',t:['hase','hase','hirsch','huhn'][ri(0,3)],x:ax,y:hs[ax]-1}); }
   // Spiegeln (Welt mal links, mal rechts)

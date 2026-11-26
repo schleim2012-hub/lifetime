@@ -3,13 +3,14 @@
 const $=id=>document.getElementById(id);
 function icon(id,sz){ return `<img src="${GFX.iconURL[id]||''}" style="width:${sz||28}px;height:${sz||28}px">`; }
 const UI={pick:null,tab:'inv',cont:null,hudT:0,
- refreshHot(){ const P=G.player; if(!P) return; let h=''; for(let i=0;i<HOT_N;i++){ const s=P.inv[i]; h+=`<div class="slot ${i===P.sel?'sel':''}" data-i="${i}"><span class="k">${i+1}</span>${s?icon(s.id)+(s.n>1?`<span class="n">${s.n}</span>`:''):''}</div>`; } $('hot').innerHTML=h;
+ refreshHot(){ const P=G.player; if(!P) return; let h=''; for(let i=0;i<HOT_N;i++){ const s=P.inv[i]; h+=`<div class="slot ${i===P.sel?'sel':''}" data-i="${i}"><span class="k">${i+1}</span>${s?icon(s.id)+(s.n>1?`<span class="n">${s.n}</span>`:''):''}</div>`; } $('hot').innerHTML=h; const cur=P.inv[P.sel]; $('hotname').textContent=cur?ITEMS[cur.id].n:'';
    $('a-lbl').textContent=actLabel(); if(!$('panel').classList.contains('hide')&&UI.tab==='inv') UI.renderInv(); },
  msgs(){ $('msgs').innerHTML=G.msgs.map(m=>`<div style="color:${m.col};opacity:${Math.min(1,m.life)}">${m.t}</div>`).join(''); },
  hud(dt){ UI.hudT-=dt; if(UI.hudT>0) return; UI.hudT=0.15; const P=G.player;
    const set=(id,v)=>$(id).firstElementChild.style.width=Math.max(0,Math.min(100,v))+'%';
    set('b-hp',P.hp/maxHp()*100); set('b-hu',P.hu); set('b-th',P.th); set('b-st',P.stam/maxStam()*100); set('b-wa',P.warm); set('b-br',P.breath); $('b-br').style.display=P.breath<100?'block':'none';
    $('xpline').firstElementChild.style.width=(P.xp/xpNeed(P.lvl)*100)+'%';
+   UI.hearts(); UI.minimap();
    const h=hour(); const hh=Math.floor(h), mm=Math.floor((h-hh)*60/10)*10; $('clock').textContent=`Tag ${G.day} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}${isNight()?' 🌙':' ☀'}`;
    const left=(7-G.day%7)%7; $('bmc').textContent=G.bloodmoon?`🩸 BLUTMOND · ${Math.max(0,G.bmSpawned-G.bmKills)} übrig`:left===0?'🩸 Blutmond heute Nacht!':`🩸 in ${left} ${left===1?'Tag':'Tagen'}`;
    for(const m of G.msgs) m.life-=0.15; const before=G.msgs.length; G.msgs=G.msgs.filter(m=>m.life>0); UI.msgs();
@@ -18,6 +19,24 @@ const UI={pick:null,tab:'inv',cont:null,hudT:0,
    const it=findInteract(); $('e-lbl').textContent=it?it.lbl:'—'; $('btn-e').classList.toggle('dim',!it); $('a-lbl').textContent=actLabel();
    if(P.sp>0) $('btn-inv').style.boxShadow='0 0 8px #b388ff'; else $('btn-inv').style.boxShadow='';
  },
+ hearts(){ const P=G.player, mx=maxHp(), n=Math.ceil(mx/20); const c=$('hearts'); const W=n*11; if(c.width!==W){ c.width=W; c.style.width=(W*1.5)+'px'; } const g=c.getContext('2d'); g.clearRect(0,0,c.width,c.height);
+   const H=['..XX.XX..','.XrrXrrX.','XrwrrrrrX','XrrrrrrrX','.XrrrrrX.','..XrrrX..','...XrX...','....X....'];
+   for(let i=0;i<n;i++){ const f=Math.max(0,Math.min(1,(P.hp-i*20)/20)); const fx=Math.round(f*9); for(let y=0;y<8;y++)for(let x=0;x<9;x++){ const ch=H[y][x]; if(ch==='.') continue; let col=ch==='X'?'#3a0000':(x<fx?(ch==='w'?'#ffd0d0':y<3?'#ff5a5a':'#e01e1e'):'#4a2a2a'); g.fillStyle=col; g.fillRect(i*11+x+1,y+1,1,1);} }
+   $('lifelbl').textContent=`Leben: ${Math.max(0,Math.ceil(P.hp))}/${mx}`; },
+ mmZoom:2,
+ minimap(){ const c=$('mm'); if(!c||!G.w) return; const g=c.getContext('2d'), w=G.w, P=G.player; const Wc=c.width,Hc=c.height; const z=UI.mmZoom;
+   if(!UI.mmCols){ UI.mmCols=TILES.map(t=>{ if(!t) return [0,0,0]; const v=parseInt((t.c.length===4?t.c.replace(/#(.)(.)(.)/,'#$1$1$2$2$3$3'):t.c).slice(1),16); return [v>>16&255,v>>8&255,v&255]; }); }
+   const id=g.createImageData(Wc,Hc), D=id.data; const ptx=(P.x+P.w/2)/T, pty=(P.y+P.h/2)/T; const dl=dayLight();
+   for(let j=0;j<Hc;j++)for(let i=0;i<Wc;i++){ const x=Math.floor(ptx+(i-Wc/2)*z), y=Math.floor(pty+(j-Hc/2)*z); const k=(j*Wc+i)*4; let r=0,gg=0,b=0;
+     if(x>=0&&y>=0&&x<w.W&&y<w.H&&G.explored[(y>>3)*200+(x>>3)]){ const t=w.tiles[y*w.W+x]; if(t){ [r,gg,b]=UI.mmCols[t]; } else if(w.bg[y*w.W+x]){ r=40;gg=30;b=28; } else if(y<w.sky[x]){ r=60+80*dl|0; gg=90+110*dl|0; b=140+100*dl|0; } else { r=20;gg=14;b=10; } }
+     D[k]=r; D[k+1]=gg; D[k+2]=b; D[k+3]=255; }
+   g.putImageData(id,0,0);
+   const dot=(e,col,s)=>{ const x=Wc/2+((e.x+e.w/2)/T-ptx)/z, y=Hc/2+((e.y+e.h/2)/T-pty)/z; if(x<0||y<0||x>Wc||y>Hc) return; g.fillStyle='#000'; g.fillRect(x-s/2-1|0,y-s/2-1|0,s+2,s+2); g.fillStyle=col; g.fillRect(x-s/2|0,y-s/2|0,s,s); };
+   for(const e of G.ents){ if(e.dead) continue; if(e.kind==='npc') dot(e,'#ffd54f',3); else if(hostile(e)&&!e.sleep) dot(e,MOBS[e.t].mutant||MOBS[e.t].boss?'#e040fb':'#ff3b3b',2); }
+   dot(P,'#ffffff',3); },
+ floats(ox,oy){ const box=$('floats'); if(!box) return; const cv=$('c'); const sc=cv.getBoundingClientRect().width/G.VW; UI.fpool=UI.fpool||[]; const pool=UI.fpool; let i=0;
+   for(const n of G.nums){ let el=pool[i]; if(!el){ el=document.createElement('div'); box.appendChild(el); pool.push(el); } i++; el.style.display=''; if(el._t!==n.t){ el.textContent=n.t; el._t=n.t; } el.style.color=n.col; el.className=n.key?'':'dmg'; el.style.left=((n.x+ox)*sc)+'px'; el.style.top=((n.y+oy)*sc)+'px'; el.style.opacity=Math.min(1,n.life*2); }
+   for(;i<pool.length;i++) if(pool[i].style.display!=='none') pool[i].style.display='none'; },
  open(tab){ UI.tab=tab||'inv'; $('panel').classList.remove('hide'); G.paused=true; UI.renderPanel(); sfx('click'); },
  close(){ $('panel').classList.add('hide'); G.paused=false; UI.cont=null; UI.pick=null; UI.npc=null; UI.refreshHot(); },
  renderPanel(){ const tabs=UI.cont?[['cont',UI.contName]]:UI.npc?[['npc',NPCS[UI.npc.t].n]]:UI.tab==='menu'||UI.tab==='opt'||UI.tab==='help'?[['menu','Menü'],['opt','Optionen'],['help','Anleitung']]:[['inv','Rucksack'],['craft','Herstellen'],['skills','Skills'+(G.player.sp?` (${G.player.sp})`:'')],['map','Karte'],['story','Tagebuch']];
@@ -75,13 +94,13 @@ const UI={pick:null,tab:'inv',cont:null,hudT:0,
  renderCont(){ const arr=G.containers[UI.cont]||[]; let h=`<div class="row" style="flex-wrap:wrap"><div><h3>${UI.contName}</h3><div class="grid" style="width:340px">`; for(let i=0;i<Math.max(8,arr.length);i++) h+=UI.slotHTML(arr[i],i,'c'); h+=`</div><button data-act="takeall">Alles nehmen</button></div><div><h3>Rucksack</h3><div class="grid" style="width:340px">`; G.player.inv.forEach((s,i)=>h+=UI.slotHTML(s,i,'p')); h+='</div><div class="info">Antippen = rüberlegen.</div></div></div>'; $('pbody').innerHTML=h; },
  talk(n){ UI.npc=n; UI.say=null; if(!n.met){ n.met=true; gainXP(20); } UI.open('npc'); },
  renderNPC(){ const n=UI.npc, d=NPCS[n.t]; const P=G.player; let txt=UI.say||d.hi[Math.random()*d.hi.length|0];
-   let h=`<div class="npcbox"><canvas id="npcc" width="24" height="30"></canvas><div class="say"><b>${d.n}</b> <small>(${d.role})</small><br>${txt}</div></div><div style="margin-top:6px">`;
+   let h=`<div class="npcbox"><canvas id="npcc" width="32" height="44"></canvas><div class="say"><b>${d.n}</b> <small>(${d.role})</small><br>${txt}</div></div><div style="margin-top:6px">`;
    h+=`<button data-n="theory">Was ist passiert?</button><button data-n="rumor">Gerüchte?</button>`; if(d.trade) h+=`<button data-n="trade">Handeln</button>`;
    if(!d.trader){ if(!n.recruited) h+=`<button data-n="recruit">Komm mit mir!</button>`; else { h+=`<button data-n="follow">Folge mir</button><button data-n="base">Bewache die Basis</button><button data-n="home">Geh nach Hause</button>`; } }
    h+=`</div>`;
    if(UI.npcTrade){ h+=`<h3>Angebot (du hast ${countItem('kronkorken')} Kronkorken)</h3>`; for(let i=0;i<d.trade.length;i++){ const [id,n2,pr]=d.trade[i]; h+=`<div class="rec">${icon(id)}<div class="nm">${n2}× ${ITEMS[id].n}<small>${pr} Kronkorken</small></div><button data-buy="${i}" ${countItem('kronkorken')>=pr?'':'disabled'}>Kaufen</button></div>`; }
      if(d.buy){ h+='<h3>Verkaufen</h3>'; for(const [id,pr] of SELL) if(countItem(id)>0) h+=`<div class="rec">${icon(id)}<div class="nm">${ITEMS[id].n} (hast ${countItem(id)})<small>${pr} Kronkorken pro Stück</small></div><button data-sell="${id}">Verkaufen</button></div>`; } }
-   $('pbody').innerHTML=h; const c=$('npcc').getContext('2d'); c.imageSmoothingEnabled=false; drawHumanoid(c,12,29,{skin:d.col,shirt:d.shirt,pants:d.pants,hair:d.hair,cap:d.cap,dir:1,mohawk:n.t==='mecki',h:26,w:10}); },
+   $('pbody').innerHTML=h; const c=$('npcc').getContext('2d'); c.imageSmoothingEnabled=false; drawSprite(c,n.t,'i',16,43,1,{}); },
  npcAct(a){ const n=UI.npc, d=NPCS[n.t]; UI.npcTrade=false;
    if(a==='theory') UI.say=d.theory; if(a==='rumor'){ UI.say=RUMORS[G.rumor++%RUMORS.length]; }
    if(a==='trade'){ UI.npcTrade=true; UI.say='Schau dich um. Nur Kronkorken, kein Anschreiben!'; }

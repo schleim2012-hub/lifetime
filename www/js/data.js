@@ -11,7 +11,7 @@ defT(3,{n:'Stein',h:3,tool:'pick',drop:['stein',1],c:'#7d7d85'});
 defT(4,{n:'Sand',h:1,tool:'hand',drop:['sand',1],c:'#d8c07a'});
 defT(5,{n:'Wasser',s:false,h:0,liquid:true,c:'#2c6fb5'});
 defT(6,{n:'Baumstamm',s:false,h:2,tool:'axe',drop:['holz',2],c:'#6b4428',tree:true});
-defT(7,{n:'Blätter',s:false,h:0.4,tool:'hand',drop:null,c:'#2f7a2f',tree:true});
+defT(7,{n:'Blätter',s:false,h:0.4,tool:'hand',drop:null,c:'#3f9a2f',tree:true,leaf:true});
 defT(8,{n:'Holzbretter',h:2,tool:'axe',drop:['bretter',1],c:'#a8743f'});
 defT(9,{n:'Bruchstein',h:3.5,tool:'pick',drop:['bruchstein',1],c:'#6c6c72'});
 defT(10,{n:'Ziegel',h:4,tool:'pick',drop:['ziegel',1],c:'#9b4a35'});
@@ -52,6 +52,14 @@ defT(44,{n:'Lagerkiste (Gang)',s:false,h:2,tool:'hand',drop:null,loot:'gang',c:'
 defT(45,{n:'Kannibalen-Totem',s:false,h:2,tool:'axe',drop:['knochen',5],cann:true,c:'#c9b48a'});
 defT(46,{n:'Erdwand-Lehm',h:1.2,tool:'hand',drop:['lehm',1],c:'#9c6b4a'});
 defT(47,{n:'Schnee',h:0.8,tool:'hand',drop:null,c:'#f2f6fa'});
+defT(49,{n:'Kirschblüten',s:false,h:0.4,tool:'hand',drop:null,c:'#f48fb1',tree:true,leaf:true});
+defT(50,{n:'Herbstlaub',s:false,h:0.4,tool:'hand',drop:null,c:'#f2b630',tree:true,leaf:true});
+defT(51,{n:'Nadeln',s:false,h:0.4,tool:'hand',drop:null,c:'#1f6b4a',tree:true,leaf:true});
+defT(52,{n:'Tropfstein',s:false,h:0.5,tool:'hand',drop:['stein',1],c:'#8a8a92'});
+defT(53,{n:'Ranke',s:false,h:0.3,tool:'hand',drop:['faser',1],climb:true,c:'#3a8a2a'});
+defT(54,{n:'Pilzgras',h:1.2,tool:'hand',drop:['schlamm',1],c:'#3a6fd8'});
+defT(55,{n:'Leuchtpilz',s:false,h:0.3,tool:'hand',drop:['leuchtpilz',1],light:0.75,lcol:'blue',c:'#5ab0ff'});
+defT(56,{n:'Schlamm',h:1.2,tool:'hand',drop:['schlamm',1],c:'#4a4258'});
 defT(48,{n:'Kannibalen-Vorrat',s:false,h:2,tool:'hand',drop:null,loot:'kann',cann:true,c:'#8a6'});
 // Hintergrundwände
 const WALLS = {1:{n:'Erdwand',c:'#3e2716'},2:{n:'Holzwand',c:'#5c3d1e',item:'holzwand'},3:{n:'Ziegelwand',c:'#5a2a20',item:'ziegelwand'},4:{n:'Betonwand',c:'#555553',item:'betonwand'},5:{n:'Steinwand',c:'#3b3b40',item:'steinwand'},6:{n:'Tapete',c:'#6d6248'},7:{n:'Zeltstoff',c:'#5d5a3a'}};
@@ -71,6 +79,8 @@ I('beton',{n:'Beton',type:'block',tile:11});
 I('glas',{n:'Glas',type:'block',tile:12});
 I('stahl',{n:'Stahlplatte',type:'block',tile:13,d:'Fast unzerstörbar. Ideal gegen den Blutmond.'});
 I('lehm',{n:'Lehm',type:'block',tile:46});
+I('schlamm',{n:'Schlamm',type:'block',tile:56});
+I('leuchtpilz',{n:'Leuchtpilz',type:'food',ic:'shroom',col:'#5ab0ff',food:{hu:6,hp:8},d:'Leuchtet blau. Schmeckt nach Erde und Abenteuer.'});
 I('leiter',{n:'Leiter',type:'block',tile:18});
 I('tuer',{n:'Tür',type:'block',tile:19,d:'Tippen zum Öffnen/Schließen.'});
 I('fackel',{n:'Fackel',type:'block',tile:21});
@@ -247,33 +257,41 @@ const LOOT = {
 };
 // Gegnertypen. hp, spd (px/s), dmg, w/h in px, sense (Kacheln), xp
 const MOBS = {
- schlurfer:{n:'Schlurfer',hp:40,spd:30,dmg:8,w:10,h:26,xp:10,zombie:true,col:'#6b8f5e',shirt:'#5a6f8a',pants:'#3d3d50'},
- schwester:{n:'Schwester Grausam',hp:45,spd:34,dmg:9,w:10,h:26,xp:12,zombie:true,col:'#8fa080',shirt:'#e8e8e8',pants:'#e8e8e8',nurse:true},
- brandmeister:{n:'Brandmeister Kokel',hp:95,spd:26,dmg:12,w:11,h:27,xp:20,zombie:true,col:'#7a8f6a',shirt:'#d4a017',pants:'#8a6a10',helmet:'#c22'},
- fettsack:{n:'Fettsack Bertl',hp:160,spd:20,dmg:16,w:16,h:28,xp:28,zombie:true,col:'#8a9a6e',shirt:'#ddd',pants:'#335',fat:true,spit:true},
- kriecher:{n:'Kriecher',hp:30,spd:36,dmg:7,w:20,h:10,xp:10,zombie:true,col:'#6a7f5a',shirt:'#6a5a4a',pants:'#333',crawl:true},
- spinne:{n:'Spinnen-Karl',hp:60,spd:60,dmg:10,w:12,h:20,xp:22,zombie:true,col:'#9aa',shirt:'#555',pants:'#333',spider:true,jump:340},
- hund:{n:'Zombiehund',hp:28,spd:95,dmg:7,w:18,h:12,xp:10,zombie:true,col:'#5a4a3a',dog:true,jump:260},
- geier:{n:'Zombiegeier',hp:22,spd:70,dmg:6,w:16,h:10,xp:10,zombie:true,col:'#3a3030',fly:true},
- bulle:{n:'Schmier-Bulle',hp:110,spd:28,dmg:12,w:11,h:27,xp:30,zombie:true,col:'#7f9a70',shirt:'#2b3f7a',pants:'#1a2550',cap:'#1a2550',spit:true,blowup:true},
- kreischerin:{n:'Kreischerin',hp:50,spd:40,dmg:7,w:10,h:26,xp:18,zombie:true,col:'#b8c2b0',shirt:'#eee',pants:'#ccc',hair:'#ddd',scream:true},
+ schlurfer:{n:'Schlurfer',hp:40,spd:30,dmg:8,w:14,h:40,xp:10,zombie:true,col:'#6b8f5e',shirt:'#5a6f8a',pants:'#3d3d50'},
+ schwester:{n:'Schwester Grausam',hp:45,spd:34,dmg:9,w:14,h:40,xp:12,zombie:true,col:'#8fa080',shirt:'#e8e8e8',pants:'#e8e8e8',nurse:true},
+ brandmeister:{n:'Brandmeister Kokel',hp:95,spd:26,dmg:12,w:14,h:40,xp:20,zombie:true,col:'#7a8f6a',shirt:'#d4a017',pants:'#8a6a10',helmet:'#c22'},
+ fettsack:{n:'Fettsack Bertl',hp:160,spd:20,dmg:16,w:18,h:40,xp:28,zombie:true,col:'#8a9a6e',shirt:'#ddd',pants:'#335',fat:true,spit:true},
+ kriecher:{n:'Kriecher',hp:30,spd:36,dmg:7,w:26,h:14,xp:10,zombie:true,col:'#6a7f5a',shirt:'#6a5a4a',pants:'#333',crawl:true},
+ spinne:{n:'Spinnen-Karl',hp:60,spd:60,dmg:10,w:20,h:28,xp:22,zombie:true,col:'#9aa',shirt:'#555',pants:'#333',spider:true,jump:340},
+ hund:{n:'Zombiehund',hp:28,spd:95,dmg:7,w:24,h:18,xp:10,zombie:true,col:'#5a4a3a',dog:true,jump:260},
+ geier:{n:'Zombiegeier',hp:22,spd:70,dmg:6,w:24,h:18,xp:10,zombie:true,col:'#3a3030',fly:true},
+ bulle:{n:'Schmier-Bulle',hp:110,spd:28,dmg:12,w:14,h:40,xp:30,zombie:true,col:'#7f9a70',shirt:'#2b3f7a',pants:'#1a2550',cap:'#1a2550',spit:true,blowup:true},
+ kreischerin:{n:'Kreischerin',hp:50,spd:40,dmg:7,w:14,h:40,xp:18,zombie:true,col:'#b8c2b0',shirt:'#eee',pants:'#ccc',hair:'#ddd',scream:true},
+ bauarbeiter:{n:'Baustellen-Bodo',hp:70,spd:30,dmg:11,w:14,h:40,xp:14,zombie:true},
+ soldat:{n:'Gasmasken-Gefreiter',hp:130,spd:34,dmg:13,w:14,h:40,xp:30,zombie:true,armor:0.3},
+ clown:{n:'Clown Kicherich',hp:55,spd:44,dmg:9,w:14,h:40,xp:16,zombie:true,honk:true},
+ springer:{n:'Der Springer',hp:60,spd:55,dmg:14,w:14,h:40,xp:24,zombie:true,pounce:true},
+ rammbock:{n:'Rammbock',hp:180,spd:34,dmg:22,w:22,h:40,xp:45,zombie:true,charge:true},
+ brocken:{n:'Der Brocken',hp:900,spd:38,dmg:34,w:32,h:48,xp:300,zombie:true,mutant:true,rocks:true,drop:[['mutantenherz',1],['eisen',6]]},
+ mantelmann:{n:'Der Mantelmann',hp:1100,spd:46,dmg:30,w:18,h:56,xp:350,zombie:true,mutant:true,drop:[['mutantenherz',1],['lederjacke',1],['kronkorken',60]]},
  // Menschen
- hinterwaeldler:{n:'Sumpfbruder',hp:70,spd:48,dmg:10,w:10,h:26,xp:25,human:true,gang:true,col:'#d9a066',shirt:'#8a3a2a',pants:'#3a4a6a',cap:'#556b2f',gun:true},
- schlaeger:{n:'Sumpfbruder-Schläger',hp:90,spd:52,dmg:14,w:11,h:26,xp:25,human:true,gang:true,col:'#c98a56',shirt:'#556b2f',pants:'#3a3a3a',hair:'#3a2a1a'},
- kannibale:{n:'Kannibale',hp:65,spd:62,dmg:12,w:10,h:26,xp:22,human:true,cann:true,col:'#c48a5a',shirt:null,pants:'#6b4a2a',paint:'#c22',hair:'#2a1a0a'},
+ saegesepp:{n:'Säge-Sepp',hp:320,spd:58,dmg:26,w:14,h:40,xp:120,human:true,gang:true,chainsaw:true,drop:[['kettensaege',1],['benzin',2]]},
+ hinterwaeldler:{n:'Sumpfbruder',hp:70,spd:48,dmg:10,w:14,h:40,xp:25,human:true,gang:true,col:'#d9a066',shirt:'#8a3a2a',pants:'#3a4a6a',cap:'#556b2f',gun:true},
+ schlaeger:{n:'Sumpfbruder-Schläger',hp:90,spd:52,dmg:14,w:14,h:40,xp:25,human:true,gang:true,col:'#c98a56',shirt:'#556b2f',pants:'#3a3a3a',hair:'#3a2a1a'},
+ kannibale:{n:'Kannibale',hp:65,spd:62,dmg:12,w:14,h:40,xp:22,human:true,cann:true,col:'#c48a5a',shirt:null,pants:'#6b4a2a',paint:'#c22',hair:'#2a1a0a'},
  // Mutanten (Mini-Bosse)
- doppelkopf:{n:'Doppelkopf',hp:420,spd:70,dmg:20,w:18,h:30,xp:150,mutant:true,col:'#d8a0a0',drop:[['mutantenherz',1],['zwillingsklinge',1]],jump:330},
- armige:{n:'Der Armige',hp:650,spd:40,dmg:30,w:22,h:36,xp:200,mutant:true,col:'#c89080',drop:[['mutantenherz',1],['armknochen',1]],slam:true},
- spinnenfrau:{n:'Die Spinnenfrau',hp:380,spd:80,dmg:18,w:20,h:22,xp:170,mutant:true,col:'#e0b0b0',drop:[['mutantenherz',1],['seide',8]],jump:420,spider:true},
+ doppelkopf:{n:'Doppelkopf',hp:420,spd:70,dmg:20,w:24,h:40,xp:150,mutant:true,col:'#d8a0a0',drop:[['mutantenherz',1],['zwillingsklinge',1]],jump:330},
+ armige:{n:'Der Armige',hp:650,spd:40,dmg:30,w:28,h:46,xp:200,mutant:true,col:'#c89080',drop:[['mutantenherz',1],['armknochen',1]],slam:true},
+ spinnenfrau:{n:'Die Spinnenfrau',hp:380,spd:80,dmg:18,w:30,h:30,xp:170,mutant:true,col:'#e0b0b0',drop:[['mutantenherz',1],['seide',8]],jump:420,spider:true},
  // Bosse
- fleischberg:{n:'Der Fleischberg',hp:2600,spd:50,dmg:35,w:72,h:60,xp:800,boss:true,col:'#b06060',drop:[['herzdesberges',1],['kettensaege',1],['kronkorken',150]]},
- geierkoenigin:{n:'Die Geierkönigin',hp:2200,spd:120,dmg:28,w:70,h:34,xp:800,boss:true,fly:true,col:'#5a4040',drop:[['fluegel',1],['armbrust',1],['pfeil',60],['kronkorken',150]]},
+ fleischberg:{n:'Der Fleischberg',hp:2600,spd:50,dmg:35,w:80,h:66,xp:800,boss:true,col:'#b06060',drop:[['herzdesberges',1],['kettensaege',1],['kronkorken',150]]},
+ geierkoenigin:{n:'Die Geierkönigin',hp:2200,spd:120,dmg:28,w:80,h:44,xp:800,boss:true,fly:true,col:'#5a4040',drop:[['fluegel',1],['armbrust',1],['pfeil',60],['kronkorken',150]]},
  // Tiere
- hase:{n:'Hase',hp:8,spd:90,dmg:0,w:10,h:8,xp:3,animal:true,col:'#c8b090',drop:[['fleisch_roh',1],['leder',1]]},
- hirsch:{n:'Hirsch',hp:40,spd:100,dmg:0,w:22,h:20,xp:8,animal:true,col:'#9a6a3a',drop:[['fleisch_roh',3],['leder',3]]},
- huhn:{n:'Wildhuhn',hp:6,spd:60,dmg:0,w:9,h:9,xp:2,animal:true,col:'#ddd',drop:[['fleisch_roh',1],['federn',3]]},
+ hase:{n:'Hase',hp:8,spd:90,dmg:0,w:14,h:12,xp:3,animal:true,col:'#c8b090',drop:[['fleisch_roh',1],['leder',1]]},
+ hirsch:{n:'Hirsch',hp:40,spd:100,dmg:0,w:28,h:34,xp:8,animal:true,col:'#9a6a3a',drop:[['fleisch_roh',3],['leder',3]]},
+ huhn:{n:'Wildhuhn',hp:6,spd:60,dmg:0,w:12,h:14,xp:2,animal:true,col:'#ddd',drop:[['fleisch_roh',1],['federn',3]]},
 };
-const ZOMBIE_NAMES = ['schlurfer','schwester','brandmeister','fettsack','kriecher','spinne','hund','geier','bulle','kreischerin'];
+const ZOMBIE_NAMES = ['schlurfer','schwester','brandmeister','fettsack','kriecher','spinne','hund','geier','bulle','kreischerin','bauarbeiter','soldat','clown','springer','rammbock'];
 
 // NPCs mit Theorien (Filmparodien), Handel und Anwerben
 const NPCS = {
@@ -305,8 +323,16 @@ const NPCS = {
   hi:['Himmelsnetz ist erwacht. Ich komme wieder. ...Moment, falscher Film.','Regel Nummer eins: Ausdauer. Regel Nummer zwei: Doppelt tippen.'],
   theory:'Die Maschinen! Ein Computer namens Himmelsnetz hat beschlossen, dass wir überflüssig sind. Die Zombies sind nur der Anfang. Bald kommt ein nackter Österreicher aus der Zukunft. Oder ein Wasserfilm, wo alles überflutet ist. Ich hab alles mitgeschrieben!',
   wish:{funkgeraet:1}, trade:[['muni',10,16],['pulver',2,10],['rohrbombe',1,35]]},
+rudi:{n:'Sheriff Rudi',role:'Hilfssheriff',skill:'schiessen',skilltxt:'Schießt mit seinem Revolver und hält die Stellung.',hp:150,dmg:20,ranged:true,
+  hi:['Ruhig bleiben. Ich bin das Gesetz hier. Also, was davon übrig ist.','Ich such meine Familie. Hast du wen mit Sheriffhut gesehen? Außer mir?'],
+  theory:'Ich bin im Krankenhaus aufgewacht, Blumen verwelkt, Uhr stehengeblieben. Und dann die Wahrheit: Wir sind alle schon angesteckt. Egal wie du stirbst – du stehst wieder auf. Also stirb lieber nicht.',
+  wish:{muni:20,konserve:3}, trade:[['muni',10,14],['pistole',1,55]]},
+ doris:{n:'Armbrust-Doris',role:'Jägerin',skill:'kaempfen',skilltxt:'Kämpft mit Messer und Armbrust, sehr flink.',hp:170,dmg:18,
+  hi:['Psst. Die Pilze da unten in den Höhlen – fass die bloß nicht an.','Mein Motorrad hat kein Benzin mehr. Mein Humor auch nicht.'],
+  theory:'Ein Pilz. Ich sag\'s dir, ein Pilz, der in Köpfe wächst. Die Leute fangen an zu klicken wie kaputte Uhren. Hab ich mal in so nem Spiel gesehen. Oder geträumt. Die blauen Leuchtpilze unten in den Höhlen sind mir jedenfalls nicht geheuer.',
+  wish:{pfeil:20,fleisch:3}, trade:[['pfeil',10,8],['bogen',1,18],['leder',3,9]]},
 };
-const NPC_ORDER = ['kalle','gerda','brems','mecki','uschi','willi','funker'];
+const NPC_ORDER = ['kalle','gerda','brems','mecki','uschi','willi','funker','rudi','doris'];
 // Zufällige Gerüchte, die NPCs erzählen
 const RUMORS = [
  'Man sagt, in einem der Hochhäuser hat jemand ein geheimes Lager mit Waffentresor versteckt. Ganz oben oder ganz unten – wer weiß das schon.',

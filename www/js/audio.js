@@ -38,6 +38,9 @@ const SFX={
  splash(){ noise(0.3,0.3,700,0.8); },
  bark(){ tone(400,0.1,'square',0.12,250); },
  bird(){ tone(1200,0.15,'sine',0.05,1800); },
+ honk(){ tone(420,0.12,'square',0.12,380); tone(330,0.16,'square',0.12,300,SND.ctx&&SND.ctx.currentTime+0.13); },
+ saw(){ const t=SND.ctx&&SND.ctx.currentTime; for(let i=0;i<6;i++) tone(95+i%2*30,0.12,'sawtooth',0.12,130,t+i*0.1); noise(0.6,0.15,1500,1); },
+ thud(){ tone(60,0.3,'sine',0.4,30); noise(0.25,0.4,300,1); },
 };
 function sfx(n){ try{ if(SND.ctx&&SFX[n]) SFX[n](); }catch(e){} }
 // ---- Musik: kleiner Sequenzer, Stimmung je nach Lage ----
