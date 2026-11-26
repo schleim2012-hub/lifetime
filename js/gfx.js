@@ -114,6 +114,12 @@ function drawIcon(id){
    case 'jacket': px(g,col,3,3,10,11); px(g,col,1,4,2,8); px(g,col,13,4,2,8); px(g,shade(col,0.7),7,3,2,11); break;
    case 'vest': px(g,col,3,3,10,11); px(g,'#eee',5,7,6,2); break;
    case 'helmet': px(g,col,3,4,10,6); px(g,col,2,9,12,2); px(g,shade(col,1.3),5,5,3,1); break;
+   case 'pants': px(g,'#111',3,2,10,13); px(g,col,4,2,8,3); px(g,col,4,5,3,9); px(g,col,9,5,3,9); px(g,shade(col,1.25),5,6,1,6); px(g,shade(col,0.7),4,4,8,1); break;
+   case 'boots': px(g,'#111',2,4,12,10); px(g,col,3,4,4,8); px(g,col,3,10,6,3); px(g,col,9,6,4,6); px(g,col,9,10,5,3); px(g,shade(col,1.4),3,5,1,5); px(g,shade(col,0.6),3,12,11,1); break;
+   case 'hardhat': px(g,col,3,4,10,6); px(g,col,1,9,14,2); px(g,shade(col,1.3),5,5,3,1); px(g,shade(col,0.7),7,3,2,7); break;
+   case 'mask': px(g,'#3a3d40',3,3,10,10); px(g,'#9ad0e0',4,5,3,3); px(g,'#9ad0e0',9,5,3,3); px(g,'#6a6d70',6,10,4,4); px(g,'#222',7,11,2,2); break;
+   case 'lamp': px(g,'#2a2a2a',1,7,14,2); px(g,'#888',9,5,5,6); px(g,'#fff8c0',13,6,2,4); px(g,'rgba(255,240,160,0.5)',15,6,1,4); break;
+   case 'paw': px(g,col,6,6,5,8); px(g,shade(col,1.2),5,3,3,4); px(g,shade(col,1.2),9,3,3,4); px(g,'#6a4a2a',7,13,3,2); px(g,'#c8a050',7,1,3,2); break;
    case 'wing': for(let i=0;i<6;i++){ px(g,col,2+i,3+i,2,8-i); px(g,col,12-i,3+i,2,8-i);} break;
    case 'offering': px(g,'#8b5a2b',2,11,12,3); px(g,col,4,5,8,6); px(g,'#7a2a5a',6,6,4,3); break;
    case 'whistle': px(g,col,2,6,10,4); px(g,'#333',12,7,3,2); px(g,'#eee',5,5,2,1); break;

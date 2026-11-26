@@ -7,7 +7,7 @@ function drawEnt(e,ox,oy){ const x=e.x+e.w/2+ox, y=e.y+e.h+oy; const dir=e.dir||
   const d=MOBS[e.t]; if(!d) return;
   let held=null; if(d.gang) held=d.chainsaw?'kettensaege':d.gun?'schrotflinte':'machete'; if(d.cann&&G.cannAngry>0) held='speer';
   const fr=e.sleep?'i':frameFor(e,false);
-  const an=drawSprite(ctx,e.t,fr,x,y,dir,{held,flash,rad:e.rad,alpha:e.sleep?0.9:null});
+  const an=drawSprite(ctx,e.t,e.vomitT>0?'a2':fr,x,y,dir,{held,flash,rad:e.rad,alpha:e.sleep?0.9:null,tilt:e.stagger>0?-0.28*(e.stagger/(e.stagT||0.28)):(MOBS[e.t].zombie&&!MOBS[e.t].fly?Math.sin(G.clock*2+e.x*0.1)*0.04:0)});
   const top=y-(an.ay-an.top);
   if(e.rad){ ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=0.35+Math.sin(G.clock*6)*0.1; ctx.drawImage(LOOK.glow.blue,x-20,y-e.h/2-20-6,40,40); ctx.restore(); }
   if(d.cann&&e.watch&&G.cannAngry<=0){ ctx.fillStyle='#000'; ctx.fillRect(x-2,top-10,4,8); ctx.fillStyle='#fff'; ctx.fillRect(x-1,top-9,2,4); ctx.fillRect(x-1,top-4,2,1); }

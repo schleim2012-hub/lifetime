@@ -1,7 +1,7 @@
 // Lifetime – Start, Schleife, Eingabe, Speichern
 'use strict';
 const SAVE_KEY='lifetime_save_v1', OPT_KEY='lifetime_opts';
-function resize(){ const w=innerWidth,h=innerHeight; const dpr=window.devicePixelRatio||1; const sc=Math.max(1,Math.round(h*dpr/G.opts.zoomVH)); // ganzzahlige Pixel-Skalierung
+function resize(){ const w=innerWidth,h=innerHeight; const dpr=window.devicePixelRatio||1; const sc0=Math.max(1,Math.round(h*dpr/G.opts.zoomVH)); let sc=sc0; if(G.zoomOut){ sc=Math.max(1,Math.round(h*dpr/(G.opts.zoomVH/0.75))); if(sc>=sc0&&sc0>1) sc=sc0-1; } // ganzzahlige Pixel-Skalierung
   G.VH=Math.ceil(h*dpr/sc); G.VW=Math.ceil(w*dpr/sc); cv.width=G.VW; cv.height=G.VH; cv.style.width=(G.VW*sc/dpr)+'px'; cv.style.height=(G.VH*sc/dpr)+'px'; ctx.imageSmoothingEnabled=false;
   const portrait=h>w*1.05; $('rot').classList.toggle('hide',!portrait||G.rotOK); }
 function saveOpts(){ try{ localStorage.setItem(OPT_KEY,JSON.stringify(G.opts)); }catch(e){} }
@@ -83,10 +83,10 @@ let last=0;
 function loop(t){ requestAnimationFrame(loop); const dt=Math.min(0.05,(t-last)/1000||0.016); last=t;
   try{
   if(G.state==='play'){ if(!G.paused&&!G.player.dead) update(dt); else if(G.player.dead){ G.clock+=dt; } render(); UI.hud(dt); }
-  else if(G.w){ G.clock=(G.clock||0)+dt; G.time+=dt/DAYLEN*3; if(G.time>=1) G.time-=1; G.titleX+=dt*25; G.cam.x=G.titleX; const sy=(surfaceY(Math.floor((G.cam.x+G.VW/2)/T))-11)*T; G.cam.y+=(sy-G.cam.y)*dt; ctx.imageSmoothingEnabled=false; drawBackground(); const v=drawWorld(); for(const p of G.parts){ p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt;} G.parts=G.parts.filter(p=>p.life>0); drawParts(v.ox,v.oy); drawLight(v); }
+  else if(G.w){ G.clock=(G.clock||0)+dt; G.time+=dt/DAYLEN*3; if(G.time>=1) G.time-=1; G.titleX+=dt*25; G.cam.x=G.titleX; const sy=(surfaceY(Math.floor((G.cam.x+G.VW/2)/T))-11)*T; G.cam.y+=(sy-G.cam.y)*dt; ctx.imageSmoothingEnabled=false; drawBackground(); if(typeof skyHaze==='function') skyHaze(); const v=drawWorld(); for(const p of G.parts){ p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt;} G.parts=G.parts.filter(p=>p.life>0); drawParts(v.ox,v.oy); if(typeof drawFog==="function") drawFog(v.ox,v.oy); drawLight(v); if(typeof grade==="function"){ grade(); drawVignette(); } }
   }catch(err){ console.error(err); if(!G.errShown){ G.errShown=true; msg('Fehler: '+err.message,'#ff5252'); } }
 }
 function boot(){ cv=$('c'); ctx=cv.getContext('2d'); try{ Object.assign(G.opts,JSON.parse(localStorage.getItem(OPT_KEY)||'{}')); }catch(e){}
   SND.vol.mus=G.opts.mus; SND.vol.sfx=G.opts.sfx; G.clock=0;
-  buildTileTex(); buildIcons(); buildLook(); resize(); addEventListener('resize',resize); setupInput(); applyCtrl(); toTitle(); requestAnimationFrame(loop); }
+  buildTileTex(); buildIcons(); buildLook(); resize(); addEventListener('resize',resize); setupInput(); if(typeof setupPinch==='function') setupPinch(); applyCtrl(); toTitle(); requestAnimationFrame(loop); }
 boot();
