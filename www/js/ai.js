@@ -4,7 +4,7 @@ const INPUT={jx:0,jy:0,jump:false,jumpPressed:false,act:false,actFresh:false,aim
 const GRAV=900;
 function updatePlayer(dt){ const P=G.player; if(P.dead) return;
   const wet=inWater(P), head=inWater(P,true), lad=onLadder(P); const a=armorStats();
-  const spd=95*(P.stam<5?0.7:1)*(wet?0.6:1)*SKILLFX.speed();
+  const spd=95*(P.stam<5?0.7:1)*(wet?0.6:1)*SKILLFX.speed()*(1+(a.speed||0));
   const jx=INPUT.jx; P.vx+=((jx*spd)-P.vx)*Math.min(1,dt*(P.onGround?14:6));
   if(Math.abs(jx)>0.2) P.dir=jx>0?1:-1;
   P.dropPlat=INPUT.jy>0.6;
@@ -75,19 +75,24 @@ function spawnLogic(dt){ spawnT-=dt; if(spawnT>0) return; spawnT=1.2; const P=G.
   if(hostN<max&&Math.random()<(isNight()?0.7:0.25)) spawnZombieNear(under,inCity,false);
   if(!isNight()&&animN<5&&!inCity&&!under&&Math.random()<0.2){ const sx=tx+(Math.random()<0.5?-1:1)*(30+Math.random()*15|0); const sy=surfaceY(sx)-1; if(tget(sx,sy+1)===2) G.ents.push(makeMob(['hase','hirsch','huhn','hase'][Math.random()*4|0],sx,sy)); }
   // wandernde Mutanten
-  if(isNight()&&G.day>=4&&!G.ents.some(e=>!e.dead&&MOBS[e.t]&&MOBS[e.t].mutant&&!e.sleep)&&Math.random()<0.004){ const sx=tx+(Math.random()<0.5?-40:40); const sy=surfaceY(sx)-1; const e=makeMob(inCity&&Math.random()<0.6?'mantelmann':['doppelkopf','armige','spinnenfrau','brocken','mantelmann'][Math.random()*5|0],sx,sy); e.wander=true; G.ents.push(e); msg('Etwas Großes streift durch die Nacht …','#e040fb'); }
+  if(isNight()&&G.day>=4&&tierAt(tx,Math.floor(P.y/T))>=2&&!G.ents.some(e=>!e.dead&&MOBS[e.t]&&MOBS[e.t].mutant&&!e.sleep)&&Math.random()<0.004){ const sx=tx+(Math.random()<0.5?-40:40); const sy=surfaceY(sx)-1; const e=makeMob(inCity&&Math.random()<0.6?'mantelmann':['doppelkopf','armige','spinnenfrau','brocken','mantelmann'][Math.random()*5|0],sx,sy); e.wander=true; G.ents.push(e); msg('Etwas Großes streift durch die Nacht …','#e040fb'); }
   // Aufräumen weit entfernter Zombies
   for(const e of G.ents){ if(!e.dead&&e.kind==='mob'&&e.spawned&&Math.abs(e.x-P.x)>110*T) e.dead=true; }
 }
+// Schwierigkeit: je weiter vom Absturzort und je tiefer, desto härter
+function tierAt(tx,ty){ const f=G.w.feat; const ref=f&&f.wreck?f.wreck.x+7:G.w.W/2; const depth=Math.max(0,ty-(G.w.sky[tx]||0)); return Math.max(0,Math.min(5,Math.floor(Math.abs(tx-ref)/110)+Math.floor(depth/35))); }
+const TIER_POOLS={
+ surf:[['schlurfer','schlurfer','kriecher'],['schlurfer','kriecher','schwester','bauarbeiter','hund','geier'],['schlurfer','schwester','bauarbeiter','hund','geier','brandmeister','springer','clown','bulle'],['brandmeister','springer','clown','bulle','fettsack','soldat','kreischerin','rammbock','kotzer','spinne'],['fettsack','soldat','kreischerin','rammbock','kotzer','springer','spinne','bulle']],
+ under:[['kriecher','schlurfer'],['kriecher','schlurfer','bauarbeiter','spinne'],['kriecher','spinne','bauarbeiter','springer','kotzer'],['spinne','springer','kotzer','fettsack','kreischerin'],['spinne','kotzer','fettsack','kreischerin','rammbock','springer']]};
+function spawnPool(tier,under,inCity){ const P=under?TIER_POOLS.under:TIER_POOLS.surf; let pool=P[Math.min(P.length-1,tier)].slice(); if(inCity) pool=pool.filter(t=>!MOBS[t].fly||Math.random()<0.5); return pool; }
 function spawnZombieNear(under,inCity,bm){ const P=G.player; const tx=Math.floor(P.x/T), ty=Math.floor(P.y/T);
   for(let tries=0;tries<8;tries++){ const sx=tx+(Math.random()<0.5?-1:1)*(28+Math.random()*16|0); if(sx<5||sx>G.w.W-5) continue; let sy;
     if(under){ sy=ty+(Math.random()*20-10|0); let ok=false; for(let k=0;k<15;k++){ if(!solidAt(sx,sy)&&!solidAt(sx,sy-1)&&!solidAt(sx,sy-2)&&solidAt(sx,sy+1)&&tget(sx,sy)!==5){ ok=true; break;} sy++; } if(!ok) continue; }
     else { sy=surfaceY(sx)-1; if(tget(sx,sy+1)===5) continue; }
-    let pool=inCity?['schlurfer','schwester','bulle','kreischerin','fettsack','brandmeister','hund','kriecher','bauarbeiter','soldat','clown','springer']:under?['kriecher','spinne','schlurfer','kriecher','bauarbeiter']:['schlurfer','schlurfer','hund','geier','kriecher','schwester','brandmeister','bauarbeiter','springer'];
-    if(isNight()&&G.day>=3) pool=pool.concat(['spinne','fettsack','bulle','rammbock','soldat','clown']);
-    if(bm) pool=pool.concat(['hund','spinne','bulle','fettsack','geier','kreischerin']);
-    const t=pool[Math.random()*pool.length|0]; const rad=Math.random()<Math.min(0.35,(G.day-2)*0.03+(bm?0.12:0)+(isNight()?0.04:0));
-    const e=makeMob(t,sx,MOBS[t].fly?sy-6:sy,{rad,spawned:true}); G.ents.push(e); return e; }
+    let tier=tierAt(sx,sy); if(isNight()) tier++; if(bm) tier+=2; if(inCity) tier=Math.max(tier,2); tier=Math.min(6,tier);
+    const pool=spawnPool(tier,under,inCity);
+    const t=pool[Math.random()*pool.length|0]; const rad=!!MOBS[t].glow||(tier>=3&&Math.random()<Math.min(0.4,(tier-2)*0.08+(bm?0.1:0)));
+    const e=makeMob(t,sx,MOBS[t].fly?sy-6:sy,{rad,spawned:true,tier}); const k=1+0.18*Math.max(0,tier-1); e.hp*=k; e.maxhp=e.hp; e.dmgMul=1+0.12*Math.max(0,tier-1); G.ents.push(e); return e; }
   return null; }
 // ---- KI ----
 function targetsFor(e){ const arr=[G.player]; for(const o of G.ents) if(o.kind==='npc'&&o.recruited&&!o.down&&!o.dead) arr.push(o); return arr; }
@@ -115,11 +120,11 @@ function updateMob(e,dt){ const d=MOBS[e.t]; const P=G.player; e.cd-=dt; e.hurtT
     if(d.jump&&e.onGround&&e.cd<=0&&td<9*T&&Math.random()<0.03){ e.vy=-d.jump*(d.mutant?1:0.9); e.vx=Math.sign(dx)*spd*2.2; e.cd=1.2; }
     if(d.pounce&&e.onGround&&e.cd<=0&&td<8*T&&td>2*T&&Math.abs(dy)<3*T){ e.vy=-290; e.vx=Math.sign(dx)*310; e.lunge=0.7; e.cd=2.6; sfx('scream'); }
     if(d.charge&&e.onGround&&e.cd<=0&&td<11*T&&td>3*T&&Math.abs(dy)<1.5*T){ e.lunge=1.2; e.vx=Math.sign(dx)*300; e.cd=4.5; sfx('roar'); }
-    if(d.rocks&&td<15*T&&td>4*T&&e.cd<=0){ const t=1.1; G.proj.push({x:e.x+e.w/2,y:e.y+4,vx:dx/t,vy:dy/t-0.5*400*t,grav:400,dmg:d.dmg*0.7,own:'e',type:'stein',life:3}); e.cd=3.2; sfx('thud'); }
+    if(d.rocks&&td<15*T&&td>4*T&&e.cd<=0){ const t=1.1; G.proj.push({x:e.x+e.w/2,y:e.y+4,vx:dx/t,vy:dy/t-0.5*400*t,grav:400,dmg:d.dmg*0.7,own:'e',type:'stein',life:3}); e.cd=3.2; sfx('groan'); }
     if(d.chainsaw&&td<12*T){ if(!e.revved){ e.revved=true; msg('Säge-Sepp wirft die Kettensäge an!','#ff8a65'); } if(Math.random()<dt*0.8) sfx('saw'); }
-    if(d.honk&&Math.random()<dt*0.25) sfx('honk');
+    if(d.honk&&Math.random()<dt*0.07) sfx('giggle');
     // Nahkampf
-    if(td<(d.w/2+8+(tgt.w/2))&&Math.abs(dy)<d.h&&e.atk<=0||(td<e.w/2+14&&(e.atk||0)<=0)){ e.atk=1.0; const dmg=d.dmg*mult; if(tgt===P) hurtPlayer(dmg,e); else npcHurt(tgt,dmg); if(e.lunge>0&&d.charge){ tgt.vx=(tgt.vx||0)*2.2; tgt.vy=-240; e.lunge=0; G.cam.shake=Math.max(G.cam.shake,6); sfx('thud'); } }
+    if(td<(d.w/2+8+(tgt.w/2))&&Math.abs(dy)<d.h&&e.atk<=0||(td<e.w/2+14&&(e.atk||0)<=0)){ e.atk=1.0; const dmg=d.dmg*mult*(e.dmgMul||1); if(tgt===P) hurtPlayer(dmg,e); else npcHurt(tgt,dmg); if(e.lunge>0&&d.charge){ tgt.vx=(tgt.vx||0)*2.2; tgt.vy=-240; e.lunge=0; G.cam.shake=Math.max(G.cam.shake,6); sfx('thud'); } }
     e.atk=(e.atk||0)-dt;
     // Blöcke einreißen, wenn blockiert
     if(e.hitWall&&!d.fly){ e.stuck+=dt; if(e.stuck>0.5&&d.spider){ e.vy=-130; } if(e.stuck>(d.human?99:0.9)){ const fx=Math.floor((e.x+e.w/2)/T)+e.hitWall; const ys=[Math.floor((e.y+e.h-1)/T),Math.floor((e.y+e.h-17)/T),Math.floor((e.y+e.h-33)/T)]; for(const yy of ys){ const t=tget(fx,yy); if(t&&TILES[t].s){ if(TILES[t].door&&d.human){ continue; } e.bang=(e.bang||0)-dt; if(e.bang<=0){ e.bang=1; dmgTile(fx,yy,(d.dmg*mult)*(d.mutant?3:1)); sfx('hit'); } break; } } } }

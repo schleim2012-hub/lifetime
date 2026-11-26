@@ -49,6 +49,10 @@ function computeLight(x0,y0,w,h){
   // Lichtquellen aus Entitäten
   const P=G.player; if(P){ const qx=Math.floor((P.x+P.w/2)/T)-x0, qy=Math.floor((P.y+10)/T)-y0; if(qx>=0&&qy>=0&&qx<w&&qy<h) LG[qy*w+qx]=Math.max(LG[qy*w+qx],0.3); const it=heldItem(); if(it==='fackel'){ const px0=Math.floor((P.x+P.w/2)/T)-x0, py0=Math.floor((P.y+8)/T)-y0; if(px0>=0&&py0>=0&&px0<w&&py0<h) LG[py0*w+px0]=Math.max(LG[py0*w+px0],0.9);} }
   for(const p of G.parts){ if(p.light){ const a=Math.floor(p.x/T)-x0,b=Math.floor(p.y/T)-y0; if(a>=0&&b>=0&&a<w&&b<h) LG[b*w+a]=Math.max(LG[b*w+a],p.light);} }
+  const L_=(px,py,l)=>{ const a=Math.floor(px/T)-x0,b=Math.floor(py/T)-y0; if(a>=0&&b>=0&&a<w&&b<h) LG[b*w+a]=Math.max(LG[b*w+a],l); };
+  for(const q of (G.puddles||[])) L_(q.x,q.y-4,0.55*Math.min(1,q.life/3));
+  for(const e of G.ents){ if(!e.dead&&(e.rad||(e.kind==='mob'&&MOBS[e.t].glow))) L_(e.x+e.w/2,e.y+e.h/2,0.6); }
+  if(P&&typeof armorStats==='function'&&armorStats().lamp) L_(P.x+P.w/2+P.dir*10,P.y+6,0.8);
   for(const e of G.proj){ if(e.light){ const a=Math.floor(e.x/T)-x0,b=Math.floor(e.y/T)-y0; if(a>=0&&b>=0&&a<w&&b<h) LG[b*w+a]=Math.max(LG[b*w+a],e.light);} }
   // Ausbreitung
   const dec=(x,y)=>{ const t=tget(x,y); return TILES[t].s&&!TILES[t].glass?0.22:0.075; };

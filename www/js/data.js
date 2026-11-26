@@ -260,6 +260,7 @@ const MOBS = {
  schlurfer:{n:'Schlurfer',hp:40,spd:30,dmg:8,w:14,h:40,xp:10,zombie:true,col:'#6b8f5e',shirt:'#5a6f8a',pants:'#3d3d50'},
  schwester:{n:'Schwester Grausam',hp:45,spd:34,dmg:9,w:14,h:40,xp:12,zombie:true,col:'#8fa080',shirt:'#e8e8e8',pants:'#e8e8e8',nurse:true},
  brandmeister:{n:'Brandmeister Kokel',hp:95,spd:26,dmg:12,w:14,h:40,xp:20,zombie:true,col:'#7a8f6a',shirt:'#d4a017',pants:'#8a6a10',helmet:'#c22'},
+ kotzer:{n:'Glüh-Kotzer',hp:45,spd:26,dmg:11,w:18,h:40,xp:34,zombie:true,col:'#7a9a5a',shirt:'#8a8a30',pants:'#3a3a28',fat:true,glow:true,vomit:true},
  fettsack:{n:'Fettsack Bertl',hp:160,spd:20,dmg:16,w:18,h:40,xp:28,zombie:true,col:'#8a9a6e',shirt:'#ddd',pants:'#335',fat:true,spit:true},
  kriecher:{n:'Kriecher',hp:30,spd:36,dmg:7,w:26,h:14,xp:10,zombie:true,col:'#6a7f5a',shirt:'#6a5a4a',pants:'#333',crawl:true},
  spinne:{n:'Spinnen-Karl',hp:60,spd:60,dmg:10,w:20,h:28,xp:22,zombie:true,col:'#9aa',shirt:'#555',pants:'#333',spider:true,jump:340},
