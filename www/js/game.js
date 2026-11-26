@@ -45,7 +45,7 @@ function killMob(e,src){ e.dead=true; const d=MOBS[e.t]; partBurst(e.x+e.w/2,e.y
   if(d.boss){ msg(`${d.n} ist besiegt!`,'#ffd54f'); G.boss=null; G.flags=G.flags||{}; G.flags['boss_'+e.t]=true; sfx('level'); }
   if(e.bm) G.bmKills++;
 }
-function hurtPlayer(dmg,src){ const P=G.player; if(P.inv_t>0||P.dead) return; const a=armorStats(); const red=Math.max(1,dmg-a.def*0.5); P.hp-=red; P.inv_t=0.5; P.hurtT=0.25; num(P.x+P.w/2,P.y,Math.round(red),'#ff5252'); partBurst(P.x+P.w/2,P.y+10,'#9a0000',5); sfx('hurt'); G.cam.shake=Math.max(G.cam.shake,3);
+function hurtPlayer(dmg,src){ const P=G.player; if(P.inv_t>0||P.dead) return; const a=armorStats(); const red=Math.max(1,(dmg-a.def*0.5)*SKILLFX.dmgTaken()); P.hp-=red; P.inv_t=0.5; P.hurtT=0.25; num(P.x+P.w/2,P.y,Math.round(red),'#ff5252'); partBurst(P.x+P.w/2,P.y+10,'#9a0000',5); sfx('hurt'); G.cam.shake=Math.max(G.cam.shake,3);
   if(src){ P.vx=(src.x<P.x?1:-1)*150; P.vy=-140; }
   if(P.hp<=0) die(); }
 function die(){ const P=G.player; P.dead=true; P.hp=0; UI.death(); }
@@ -100,9 +100,9 @@ function placeAt(tx,ty){ const id=heldItem(); const d=ITEMS[id]; if(!d||(d.type!
 function mineTick(tx,ty,dt){ const t=tget(tx,ty); const d=TILES[t]; if(!t||t===5||d.tool==='none') { G.mineT=null; return false; } if(!reachOK(tx,ty,5)) { G.mineT=null; return false; }
   const P=G.player; const it=heldDef(); const tools=it.tool||(it.type==='weapon'?{hand:1,axe:0.6}:{}); let pw=tools[d.tool]; if(!pw){ pw=d.tool==='hand'?(tools.hand||1):(tools.hand?0.12:0.1); }
   if(d.tool==='pick'&&!tools.pick&&d.h>=3&&it.id!=='hand'){ pw=0.1; }
-  pw*=1+P.sk.staerke*0.15; if(P.stam<5) pw*=0.5;
+  pw*=(1+P.sk.staerke*0.15)*SKILLFX.mine(); if(P.stam<5) pw*=0.5;
   if(!G.mineT||G.mineT.x!==tx||G.mineT.y!==ty) G.mineT={x:tx,y:ty,p:0,snd:0};
-  G.mineT.p+=dt*pw/(d.h*0.55); G.mineT.snd-=dt; P.stam-=dt*5; P.attackT=0.2;
+  G.mineT.p+=dt*pw/(d.h*0.55); G.mineT.snd-=dt; P.stam-=dt*5*SKILLFX.stamUse(); P.attackT=0.2;
   if(G.mineT.snd<=0){ G.mineT.snd=0.25; sfx(d.tool==='axe'?'chop':d.tool==='pick'?'mine':'hit'); partBurst(tx*T+8,ty*T+8,d.c,3,80); }
   if(d.tool==='pick'&&!tools.pick&&d.h>=3&&!G.flags.pickHint){ G.flags.pickHint=true; msg('Ohne Spitzhacke geht das kaum. Bau dir eine (Steinchen sammeln)!','#ffcc80'); }
   if(G.mineT.p>=1){ breakTile(tx,ty,true); G.mineT=null; } return true; }
@@ -112,7 +112,7 @@ function breakTile(tx,ty,byPlayer){ const t=tget(tx,ty), d=TILES[t]; if(!t||t===
   if(d.door){ let y=ty; while(TILES[tget(tx,y-1)].door) y--; let n=0; for(let k=y;TILES[tget(tx,k)].door;k++){ tset(tx,k,0); n++; } if(byPlayer) spawnDrop('tuer',1,tx*T+8,ty*T); sfx('brk'); return; }
   if(d.chest||d.loot){ const key=tx+','+ty; const c=G.containers[key]; if(c) for(const s of c) spawnDrop(s.id,s.n,tx*T+8,ty*T); delete G.containers[key]; }
   tset(tx,ty,0); sfx('brk'); partBurst(tx*T+8,ty*T+8,d.c,8,120);
-  if(byPlayer&&d.drop) spawnDrop(d.drop[0],d.drop[1],tx*T+8,ty*T+6);
+  if(byPlayer&&d.drop){ let n=d.drop[1]; if((d.ore||t===3||t===14||t===15||t===16||t===40)&&Math.random()<SKILLFX.ore()){ n*=2; num(tx*T+8,ty*T,'×2','#ffd54f'); } spawnDrop(d.drop[0],n,tx*T+8,ty*T+6); }
   if(byPlayer&&t===12&&Math.random()<0.5) spawnDrop('glas',1,tx*T+8,ty*T);
   if(byPlayer&&TILES[t].leaf&&Math.random()<0.15) spawnDrop('faser',1,tx*T+8,ty*T);
   if(byPlayer&&t===31&&Math.random()<0.4) spawnDrop('faser',1,tx*T+8,ty*T);
@@ -132,6 +132,7 @@ function useHeld(dt,wx,wy,fresh){ const P=G.player; if(P.dead) return; const id=
   // Ziel bestimmen
   const cx=P.x+P.w/2, cy=P.y+10;
   if(d.type==='food'){ if(fresh) eat(id); return; }
+  if(d.type==='book'){ if(fresh) readBook(id); return; }
   if(d.type==='summon'){ if(fresh) summon(id); return; }
   if(d.type==='ammo'||d.type==='misc'){ if(fresh&&id==='funkgeraet') radio(); return; }
   if(id==='flasche'){ if(fresh) fillBottle(wx,wy); return; }
@@ -141,8 +142,8 @@ function useHeld(dt,wx,wy,fresh){ const P=G.player; if(P.dead) return; const id=
   let target=null; const reach=(d.reach||2)*T;
   if(wx!=null){ const e=entAt(wx,wy,8); if(e&&(hostile(e)||MOBS[e.t]&&(MOBS[e.t].animal||MOBS[e.t].cann))&&dist(e,P)<reach+T) target=e; }
   else target=nearestHostile(reach+6,true);
-  if(target){ if(P.cd<=0){ P.dir=target.x>P.x?1:-1; const sk=1+P.sk.staerke*0.15; let dm=d.dmg*sk*(P.stam<5?0.5:1); if(id==='zwillingsklinge') dm*=1; hurtMob(target,dm,P,d.kb?260:110); if(id==='zwillingsklinge') setTimeout(()=>{ if(!target.dead) hurtMob(target,dm*0.5,P,0); },120); P.cd=d.rate; P.stam-=4; P.attackT=0.2; } G.mineT=null; return; }
-  let tx,ty; if(wx!=null){ tx=Math.floor(wx/T); ty=Math.floor(wy/T); } else { const t=frontTile(false); if(!t){ if(P.cd<=0){ P.attackT=0.2; P.cd=d.rate; sfx('jump'); } return; } tx=t.x; ty=t.y; }
+  if(target){ if(P.cd<=0){ P.dir=target.x>P.x?1:-1; const sk=(1+P.sk.staerke*0.15)*SKILLFX.melee(); let dm=d.dmg*sk*(P.stam<5?0.5:1); if(Math.random()<SKILLFX.crit()){ dm*=2; num(target.x+target.w/2,target.y-8,'KRITISCH!','#ffab00'); } if(id==='zwillingsklinge') dm*=1; hurtMob(target,dm,P,d.kb?260:110); if(id==='zwillingsklinge') setTimeout(()=>{ if(!target.dead) hurtMob(target,dm*0.5,P,0); },120); P.cd=d.rate*SKILLFX.rate(); P.stam-=4; P.attackT=0.2; } G.mineT=null; return; }
+  let tx,ty; if(wx!=null){ tx=Math.floor(wx/T); ty=Math.floor(wy/T); } else { const t=frontTile(false); if(!t){ if(P.cd<=0){ P.attackT=0.2; P.cd=d.rate*SKILLFX.rate(); sfx('jump'); } return; } tx=t.x; ty=t.y; }
   if(tget(tx,ty)===0||tget(tx,ty)===5){ if(bget(tx,ty)&&reachOK(tx,ty,5)&&bget(tx,ty)<6&&d.tool&&(d.tool.pick||d.tool.axe)){ // Hintergrundwand abbauen
       G.wallT=G.wallT&&G.wallT.x===tx&&G.wallT.y===ty?G.wallT:{x:tx,y:ty,p:0}; G.wallT.p+=dt*2; P.attackT=0.2; if(G.wallT.p>=1){ const b=bget(tx,ty); bset(tx,ty,0); const it=WALLS[b].item; if(it) spawnDrop(it,1,tx*T+8,ty*T+8); sfx('brk'); G.wallT=null; } }
     return; }
@@ -157,13 +158,13 @@ function frontTile(place){ const P=G.player; const fx=Math.floor((P.x+P.w/2)/T);
 function nearestHostile(r,front){ const P=G.player; let best=null,bd=r; for(const e of G.ents){ if(e.dead||e.kind!=='mob') continue; const d=MOBS[e.t]; if(!(hostile(e)||d.animal)) continue; const dd=dist(e,P); if(dd<bd){ if(front&&((e.x+e.w/2)-(P.x+P.w/2))*P.dir<-8&&dd>14) continue; bd=dd; best=e; } } return best; }
 function fireAt(d,tx,ty){ const P=G.player; const cx=P.x+P.w/2, cy=P.y+17;
   if(d.ranged){ const am=d.ranged.ammo; if(countItem(am)<=0){ msg(`Keine Munition (${ITEMS[am].n}).`,'#ff8a80'); P.cd=0.5; return; } removeItem(am,1);
-    const n=d.ranged.pellets||1; const ang=Math.atan2(ty-cy,tx-cx); const sk=1+P.sk.schuetze*0.15;
+    const n=d.ranged.pellets||1; const ang=Math.atan2(ty-cy,tx-cx); const sk=SKILLFX.ranged(am==='pfeil');
     for(let i=0;i<n;i++){ const a=ang+(n>1?(Math.random()-0.5)*d.ranged.spread:0); G.proj.push({x:cx,y:cy,vx:Math.cos(a)*d.ranged.spd,vy:Math.sin(a)*d.ranged.spd,grav:d.ranged.grav,dmg:d.dmg*sk,own:'p',type:am==='pfeil'?'arrow':'bullet',life:1.5}); }
-    sfx(am==='pfeil'?'bow':n>1?'shotgun':'shoot'); P.cd=d.rate; P.attackT=0.15; if(am!=='pfeil') G.cam.shake=Math.max(G.cam.shake,2); return; }
+    sfx(am==='pfeil'?'bow':n>1?'shotgun':'shoot'); P.cd=d.rate*SKILLFX.rate(); P.attackT=0.15; if(am!=='pfeil') G.cam.shake=Math.max(G.cam.shake,2); return; }
   // Wurf
-  removeItem(d.id,1); const dx=tx-cx, dy=ty-cy; const tt=0.8; G.proj.push({x:cx,y:cy,vx:dx/tt,vy:dy/tt-0.5*500*tt,grav:500,dmg:d.dmg,own:'p',type:d.id,life:3,light:d.id==='molotow'?0.6:0}); P.cd=d.rate; sfx('bow'); }
+  removeItem(d.id,1); const dx=tx-cx, dy=ty-cy; const tt=0.8; G.proj.push({x:cx,y:cy,vx:dx/tt,vy:dy/tt-0.5*500*tt,grav:500,dmg:d.dmg,own:'p',type:d.id,life:3,light:d.id==='molotow'?0.6:0}); P.cd=d.rate*SKILLFX.rate(); sfx('bow'); }
 function eat(id){ const P=G.player; const d=ITEMS[id]; const f=d.food; if(f.maxhp){ P.bonusHp+=f.maxhp; P.hp+=f.maxhp; msg('Du fühlst dich stärker! +20 max. Gesundheit','#ff8a80'); }
-  P.hu=Math.min(100,P.hu+(f.hu||0)); P.th=Math.max(0,Math.min(100,P.th+(f.th||0))); P.hp=Math.min(maxHp(),P.hp+(f.hp||0)); P.stam=Math.min(maxStam(),P.stam+(f.st||0)); if(f.wa) P.warm=Math.min(100,P.warm+f.wa);
+  P.hu=Math.min(100,P.hu+(f.hu||0)); P.th=Math.max(0,Math.min(100,P.th+(f.th||0))); P.hp=Math.min(maxHp(),P.hp+(f.hp>0?f.hp*SKILLFX.food():(f.hp||0))); P.stam=Math.min(maxStam(),P.stam+(f.st||0)); if(f.wa) P.warm=Math.min(100,P.warm+f.wa);
   if((f.hp||0)<0){ msg('Bäh! Dir ist übel.','#c5e1a5'); }
   removeItem(id,1); if(d.back) addItem(d.back,1); sfx(f.th>f.hu||id.includes('wasser')||id==='tee'?'drink':'eat'); }
 function fillBottle(wx,wy){ const P=G.player; let found=false; const cx=Math.floor((P.x+P.w/2)/T), cy=Math.floor((P.y+P.h/2)/T); for(let y=cy-2;y<=cy+3&&!found;y++)for(let x=cx-3;x<=cx+3;x++){ if(tget(x,y)===5){ found=true; break;} if(TILES[tget(x,y)].station==='tonne'){ removeItem('flasche',1); addItem('wasser',1); msg('Regenwasser abgefüllt – sauber!','#80d8ff'); sfx('drink'); return; } }

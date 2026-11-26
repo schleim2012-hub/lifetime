@@ -117,6 +117,8 @@ function drawIcon(id){
    case 'wing': for(let i=0;i<6;i++){ px(g,col,2+i,3+i,2,8-i); px(g,col,12-i,3+i,2,8-i);} break;
    case 'offering': px(g,'#8b5a2b',2,11,12,3); px(g,col,4,5,8,6); px(g,'#7a2a5a',6,6,4,3); break;
    case 'whistle': px(g,col,2,6,10,4); px(g,'#333',12,7,3,2); px(g,'#eee',5,5,2,1); break;
+   case 'book': px(g,shade(col,0.6),2,2,12,13); px(g,col,3,2,10,12); px(g,'#f5ecd0',4,4,8,4); px(g,'#333',5,5,6,1); px(g,'#333',5,7,4,1); px(g,shade(col,1.3),3,13,10,1); px(g,'#e8e0c8',12,3,1,11); break;
+   case 'shroom': px(g,'#d8e4f4',7,8,3,7); px(g,col,3,4,11,5); px(g,shade(col,1.4),5,4,4,1); px(g,'#fff',6,6,1,1); px(g,'#fff',10,5,1,1); break;
    case 'radio': px(g,col,3,5,10,10); px(g,'#888',11,1,1,5); px(g,'#7c7',5,7,6,3); break;
    default: px(g,col,3,3,10,10);
   }

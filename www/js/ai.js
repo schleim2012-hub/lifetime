@@ -4,7 +4,7 @@ const INPUT={jx:0,jy:0,jump:false,jumpPressed:false,act:false,actFresh:false,aim
 const GRAV=900;
 function updatePlayer(dt){ const P=G.player; if(P.dead) return;
   const wet=inWater(P), head=inWater(P,true), lad=onLadder(P); const a=armorStats();
-  const spd=95*(P.stam<5?0.7:1)*(wet?0.6:1);
+  const spd=95*(P.stam<5?0.7:1)*(wet?0.6:1)*SKILLFX.speed();
   const jx=INPUT.jx; P.vx+=((jx*spd)-P.vx)*Math.min(1,dt*(P.onGround?14:6));
   if(Math.abs(jx)>0.2) P.dir=jx>0?1:-1;
   P.dropPlat=INPUT.jy>0.6;
@@ -38,7 +38,7 @@ function updatePlayer(dt){ const P=G.player; if(P.dead) return;
   // Erkunden
   const ex=Math.floor(P.x/T/8), ey=Math.floor(P.y/T/8); for(let a1=-3;a1<=3;a1++)for(let b=-2;b<=2;b++){ const k=(ey+b)*200+(ex+a1); if(k>=0) G.explored[k]=1; }
 }
-function survival(dt){ const P=G.player; if(P.dead) return; const ue=1-P.sk.ueberleben*0.15;
+function survival(dt){ const P=G.player; if(P.dead) return; const ue=(1-P.sk.ueberleben*0.12)*SKILLFX.hunger();
   P.hu=Math.max(0,P.hu-dt*0.1*ue); P.th=Math.max(0,P.th-dt*0.145*ue);
   if(P.hu<=0||P.th<=0){ P.starveT=(P.starveT||0)+dt; if(P.starveT>1){ P.starveT=0; P.hp-=1; if(P.hp<=0) die(); } }
   else if(P.hu>60&&P.th>60&&P.hp<maxHp()){ P.hp=Math.min(maxHp(),P.hp+dt*0.6); }
@@ -93,10 +93,10 @@ function spawnZombieNear(under,inCity,bm){ const P=G.player; const tx=Math.floor
 function targetsFor(e){ const arr=[G.player]; for(const o of G.ents) if(o.kind==='npc'&&o.recruited&&!o.down&&!o.dead) arr.push(o); return arr; }
 function updateMob(e,dt){ const d=MOBS[e.t]; const P=G.player; e.cd-=dt; e.hurtT-=dt; e.ai-=dt;
   const night=isNight(); const mult=(night?1.35:1)*(e.rad?1.2:1)*(G.bloodmoon?1.15:1);
-  if(e.sleep){ const dd=dist(e,P); if(dd<(INPUT.jx===0?3:6)*T||(dd<10*T&&P.attackT>0)){ e.sleep=false; if(d.zombie) sfx('groan'); if(d.mutant) { msg(`${d.n} ist erwacht!`,'#e040fb'); sfx('roar'); } } else { e.vx=0; e.vy=Math.min(e.vy+GRAV*dt,500); moveBody(e,dt); return; } }
+  if(e.sleep){ const dd=dist(e,P); if(dd<(INPUT.jx===0?3:6)*T*SKILLFX.wake()||(dd<10*T&&P.attackT>0)){ e.sleep=false; if(d.zombie) sfx('groan'); if(d.mutant) { msg(`${d.n} ist erwacht!`,'#e040fb'); sfx('roar'); } } else { e.vx=0; e.vy=Math.min(e.vy+GRAV*dt,500); moveBody(e,dt); return; } }
   if(d.boss) return updateBoss(e,dt);
   // Ziel wählen
-  let tgt=null,td=1e9; const sense=(d.zombie?(night?32:16):d.mutant?18:14)*T*(G.bloodmoon&&e.bm?5:1);
+  let tgt=null,td=1e9; const sense=(d.zombie?(night?32*SKILLFX.nightSense():16):d.mutant?18:14)*T*SKILLFX.wake()**0.5*(G.bloodmoon&&e.bm?5:1);
   if(hostile(e)||d.mutant){ for(const o of targetsFor(e)){ if(o.dead) continue; const dd=dist(e,o); if(dd<td&&dd<sense){ td=dd; tgt=o; } } }
   if(d.gang&&tgt&&e.camp!=null){ const c=G.w.feat.camps[e.camp]; const ptx=(tgt.x)/T; if((ptx<c.x0-25||ptx>c.x1+25)) tgt=null; }
   let mv=0; let spd=d.spd*mult;
@@ -236,6 +236,7 @@ function update(dt){ G.clock+=dt; updateTime(dt); updatePlayer(dt); survival(dt)
   G.cam.x=Math.max(0,Math.min(G.w.W*T-G.VW,G.cam.x)); G.cam.y=Math.max(0,Math.min(G.w.H*T-G.VH,G.cam.y));
   if(G.cam.shake>0) G.cam.shake=Math.max(0,G.cam.shake-dt*15);
   // Musik
-  const under=Math.floor(P.y/T)>G.w.sky[Math.floor(P.x/T)]+14; musicMode(G.boss&&!G.boss.dead?'boss':G.bloodmoon?'blut':under?'hoehle':isNight()?'nacht':'tag');
+  const under=Math.floor(P.y/T)>G.w.sky[Math.floor(P.x/T)]+14; if(G.ents.some(e=>!e.dead&&e.kind==='mob'&&!e.sleep&&hostile(e)&&Math.abs(e.x-P.x)<9*T&&Math.abs(e.y-P.y)<5*T)) G.combatT=5; else G.combatT=(G.combatT||0)-dt;
+  musicMode(G.boss&&!G.boss.dead?'boss':G.bloodmoon?'blut':G.combatT>0?'kampf':under?'hoehle':isNight()?'nacht':'tag');
   G.autosave=(G.autosave||0)+dt; if(G.autosave>120){ G.autosave=0; saveGame(true); }
 }
