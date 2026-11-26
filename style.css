@@ -92,3 +92,11 @@ h3{margin:4px 0;color:#ffd54f;font-size:15px}
 #floats div{position:absolute;transform:translate(-50%,-100%);font-weight:bold;font-size:13px;white-space:nowrap;text-shadow:1px 1px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,0 2px 3px rgba(0,0,0,.6)}
 #floats div.dmg{font-size:15px}
 #msgs{top:64px;width:46%}
+
+.attrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.attr{background:rgba(0,0,0,.25);border:1px solid #5a3a26;border-radius:8px;padding:6px}
+.attr .ah{display:flex;align-items:center;gap:6px;font-size:15px}.attr .ah button{margin-left:auto;padding:3px 8px}
+.attr .ai{font-size:18px}.attr .lv{color:#b388ff;font-weight:bold}
+.perk{display:flex;gap:6px;align-items:center;border-top:1px solid #3a2618;padding:4px 0}.perk .pn{flex:1;font-size:13px}
+.perk .pips{color:#ffd54f;letter-spacing:1px}.perk small{opacity:.85}.perk .need{color:#ff8a80}
+.mags{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}.mag{background:rgba(0,0,0,.25);border-radius:6px;padding:5px;font-size:13px}
