@@ -1,7 +1,7 @@
 // Lifetime – Spieler, Gegner, Aktionen, Überleben
 'use strict';
 const INV_N=32, HOT_N=8;
-function newPlayer(x,y){ return {x:x*T+3,y:y*T-26+T,w:10,h:26,vx:0,vy:0,dir:1,onGround:false,canStep:true,hp:100,maxhp:100,hu:100,th:100,stam:100,warm:100,breath:100,xp:0,lvl:1,sp:0,sk:{staerke:0,ausdauer:0,handwerk:0,schuetze:0,pluenderer:0,ueberleben:0},
+function newPlayer(x,y){ return {x:x*T+1,y:y*T-40+T,w:14,h:40,vx:0,vy:0,dir:1,onGround:false,canStep:true,hp:100,maxhp:100,hu:100,th:100,stam:100,warm:100,breath:100,xp:0,lvl:1,sp:0,sk:{staerke:0,ausdauer:0,handwerk:0,schuetze:0,pluenderer:0,ueberleben:0},
   inv:new Array(INV_N).fill(null),sel:0,cd:0,walk:0,hurtT:0,spawn:{x,y},fallY:y*T,bonusHp:0,jumps:0,glide:false,attackT:0,inv_t:0}; }
 function maxHp(){ const P=G.player; return 100+P.sk.ausdauer*15+P.bonusHp; }
 function maxStam(){ return 100+G.player.sk.ausdauer*15; }
@@ -20,18 +20,19 @@ function gainXP(n){ const P=G.player; P.xp+=n; let need=xpNeed(P.lvl); while(P.x
 function xpNeed(l){ return Math.round(80*Math.pow(l,1.35)); }
 function spawnDrop(id,n,x,y){ G.drops.push({id,n,x:x-4,y:y-4,w:8,h:8,vx:(Math.random()-0.5)*60,vy:-120,t:0}); }
 function num(x,y,t,col){ G.nums.push({x,y,t:String(t),col:col||'#fff',life:0.9}); }
+function pickupText(id,n){ const P=G.player; const ex=G.nums.find(o=>o.key===id&&o.life>0.4); if(ex){ ex.cnt+=n; ex.t=`${ITEMS[id].n} (${ex.cnt})`; ex.life=1.6; return; } const k=G.nums.filter(o=>o.key&&o.life>1.0).length; G.nums.push({x:P.x+P.w/2,y:P.y-4-k*9,t:n>1?`${ITEMS[id].n} (${n})`:ITEMS[id].n,col:'#ffffff',life:1.6,key:id,cnt:n}); }
 function partBurst(x,y,col,n,spd){ for(let i=0;i<(n||6);i++) G.parts.push({x,y,vx:(Math.random()-0.5)*(spd||120),vy:-Math.random()*(spd||120),life:0.4+Math.random()*0.4,col,sz:Math.random()<0.5?1:2,grav:400}); }
 function dist(a,b){ const dx=(a.x+a.w/2)-(b.x+b.w/2), dy=(a.y+a.h/2)-(b.y+b.h/2); return Math.sqrt(dx*dx+dy*dy); }
 function nearStation(st){ if(st==='hand') return true; const P=G.player; const cx=Math.floor((P.x+P.w/2)/T), cy=Math.floor((P.y+P.h/2)/T); for(let y=cy-4;y<=cy+4;y++)for(let x=cx-5;x<=cx+5;x++){ const d=TILES[tget(x,y)]; if(d&&d.station===st) return true; } return false; }
 // ---- Entitäten ----
 function makeMob(t,tx,ty,o){ const d=MOBS[t]; const e=Object.assign({kind:'mob',t,x:tx*T+T/2-d.w/2,y:(ty+1)*T-d.h,w:d.w,h:d.h,vx:0,vy:0,dir:Math.random()<0.5?1:-1,hp:d.hp,maxhp:d.hp,canStep:!d.fly,cd:1,walk:0,stuck:0,ai:0,hurtT:0,sleep:false},o||{});
   if(e.rad){ e.hp*=2; e.maxhp=e.hp; } return e; }
-function makeNPC(id,tx,ty){ const d=NPCS[id]; return {kind:'npc',t:id,x:tx*T+3,y:(ty+1)*T-26,w:10,h:26,vx:0,vy:0,dir:-1,hp:d.hp,maxhp:d.hp,canStep:true,walk:0,cd:0,home:{x:tx,y:ty},mode:'home',trust:0,met:false,down:0,ai:0}; }
+function makeNPC(id,tx,ty){ const d=NPCS[id]; return {kind:'npc',t:id,x:tx*T+1,y:(ty+1)*T-40,w:14,h:40,vx:0,vy:0,dir:-1,hp:d.hp,maxhp:d.hp,canStep:true,walk:0,cd:0,home:{x:tx,y:ty},mode:'home',trust:0,met:false,down:0,ai:0}; }
 function hostile(e){ if(e.kind!=='mob') return false; const d=MOBS[e.t]; if(d.animal) return false; if(d.cann) return G.cannAngry>0; return true; }
 function hurtMob(e,dmg,src,kb){ if(e.dead) return; const d=MOBS[e.t]; if(e.kind==='npc'){ return; }
   if(d.cann&&G.cannAngry<=0){ G.cannAngry=2; msg('Die Kannibalen sind jetzt feindlich!','#ff5252'); }
-  e.sleep=false; e.hp-=dmg; e.hurtT=0.2; num(e.x+e.w/2,e.y,Math.round(dmg),'#ffeb3b'); partBurst(e.x+e.w/2,e.y+e.h/3,d.animal?'#a33':'#7a0000',5); sfx('hit');
-  if(kb&&!d.boss){ e.vx=kb*(src&&src.x<e.x?1:-1); e.vy=-120; }
+  e.sleep=false; if(d.armor) dmg*=(1-d.armor); e.hp-=dmg; e.hurtT=0.2; num(e.x+e.w/2,e.y,Math.round(dmg),'#ffeb3b'); partBurst(e.x+e.w/2,e.y+e.h/3,d.animal?'#a33':'#7a0000',5); sfx('hit');
+  if(kb&&!d.boss&&!d.mutant&&!e.lunge){ e.vx=kb*(src&&src.x<e.x?1:-1); e.vy=-120; }
   if(d.animal) e.flee=3;
   if(e.hp<=0) killMob(e,src); }
 function killMob(e,src){ e.dead=true; const d=MOBS[e.t]; partBurst(e.x+e.w/2,e.y+e.h/2,'#7a0000',14,180);
@@ -65,7 +66,7 @@ function interactAt(tx,ty,wx,wy){ // gibt true zurück, wenn interagiert wurde
   return false; }
 function toggleDoor(tx,ty){ let y=ty; while(TILES[tget(tx,y-1)].door) y--; const open=tget(tx,y)===19; const nt=open?20:19;
   if(!open){ // schließen nur, wenn niemand drin steht
-    const box={x:tx*T,y:y*T,w:T,h:2*T}; for(const e of [G.player,...G.ents]) if(!e.dead&&e.x<box.x+box.w&&e.x+e.w>box.x&&e.y<box.y+box.h&&e.y+e.h>box.y) return; }
+    const box={x:tx*T,y:y*T,w:T,h:3*T}; for(const e of [G.player,...G.ents]) if(!e.dead&&e.x<box.x+box.w&&e.x+e.w>box.x&&e.y<box.y+box.h&&e.y+e.h>box.y) return; }
   for(let k=y;TILES[tget(tx,k)].door;k++) tset(tx,k,nt); sfx('door'); }
 function useBed(tx,ty){ const P=G.player; P.spawn={x:tx,y:ty}; msg('Hier wachst du ab jetzt auf.','#a5d6a7');
   if(isNight()){ if(G.bloodmoon){ msg('Beim Blutmond kann niemand schlafen!','#ff5252'); return; } const near=G.ents.some(e=>!e.dead&&hostile(e)&&dist(e,P)<14*T); if(near){ msg('Du kannst nicht schlafen, Gegner sind in der Nähe.'); return; }
@@ -81,7 +82,7 @@ function openContainer(tx,ty){ const key=tx+','+ty; const t=tget(tx,ty), d=TILES
 function isRoof(tx,ty){ for(const tw of G.w.feat.towers){ if(tx>=tw.x0&&tx<tw.x1&&ty===tw.top-1) return true; } return false; }
 function canPlaceAt(tx,ty,id){ const d=ITEMS[id]; const t=tget(tx,ty); if(d.type==='wall'){ return bget(tx,ty)===0&&(t===0||!TILES[t].s); }
   if(!(t===0||t===5||t===35)) return false; if(tx<1||ty<1||tx>=G.w.W-1||ty>=G.w.H-1) return false;
-  const bt=TILES[d.tile]; const P=G.player; const box={x:tx*T,y:ty*T,w:T,h:T*(d.tile===19?2:1)};
+  const bt=TILES[d.tile]; const P=G.player; const box={x:tx*T,y:ty*T,w:T,h:T*(d.tile===19?3:1)};
   if(bt.s||d.tile===19){ for(const e of [P,...G.ents]) if(!e.dead&&e.x<box.x+box.w&&e.x+e.w>box.x&&e.y<box.y+box.h&&e.y+e.h>box.y) return false; }
   if(d.tile===19){ if(tget(tx,ty+1)!==0&&tget(tx,ty+1)!==5) { /* Tür von oben nach unten */ } }
   // Nachbar nötig
@@ -89,9 +90,9 @@ function canPlaceAt(tx,ty,id){ const d=ITEMS[id]; const t=tget(tx,ty); if(d.type
   return nb; }
 function placeAt(tx,ty){ const id=heldItem(); const d=ITEMS[id]; if(!d||(d.type!=='block'&&d.type!=='wall')) return false; if(!reachOK(tx,ty,6.5)) return false;
   if(d.type==='wall'){ if(!canPlaceAt(tx,ty,id)) return false; bset(tx,ty,d.wall); removeItem(id,1); sfx('place'); return true; }
-  if(d.tile===19){ // Tür braucht 2 Felder
-    let y=ty; if(!(tget(tx,y+1)===0)) y=ty-1; if(tget(tx,y)!==0||tget(tx,y+1)!==0) return false; const P=G.player; const box={x:tx*T,y:y*T,w:T,h:2*T}; if(P.x<box.x+box.w&&P.x+P.w>box.x&&P.y<box.y+box.h&&P.y+P.h>box.y) return false;
-    tset(tx,y,19); tset(tx,y+1,19); removeItem(id,1); sfx('place'); return true; }
+  if(d.tile===19){ // Tür braucht 3 Felder
+    let y=null; for(const s of [ty,ty-1,ty-2]){ if(tget(tx,s)===0&&tget(tx,s+1)===0&&tget(tx,s+2)===0){ y=s; break; } } if(y==null){ msg('Für eine Tür brauchst du 3 Felder Platz in der Höhe.','#ffab91'); return false; } const P=G.player; const box={x:tx*T,y:y*T,w:T,h:3*T}; if(P.x<box.x+box.w&&P.x+P.w>box.x&&P.y<box.y+box.h&&P.y+P.h>box.y) return false;
+    tset(tx,y,19); tset(tx,y+1,19); tset(tx,y+2,19); removeItem(id,1); sfx('place'); return true; }
   if(!canPlaceAt(tx,ty,id)) return false; tset(tx,ty,d.tile); removeItem(id,1); sfx('place');
   if(d.tile===28){ G.player.spawn={x:tx,y:ty}; msg('Bett aufgestellt: Hier wachst du ab jetzt auf.','#a5d6a7'); }
   if(d.tile===22&&!G.flags.fire){ G.flags.fire=true; msg('Ein Feuer! Wärme, Licht und Kochen (Rucksack → Herstellen).','#ffcc80'); }
@@ -113,7 +114,7 @@ function breakTile(tx,ty,byPlayer){ const t=tget(tx,ty), d=TILES[t]; if(!t||t===
   tset(tx,ty,0); sfx('brk'); partBurst(tx*T+8,ty*T+8,d.c,8,120);
   if(byPlayer&&d.drop) spawnDrop(d.drop[0],d.drop[1],tx*T+8,ty*T+6);
   if(byPlayer&&t===12&&Math.random()<0.5) spawnDrop('glas',1,tx*T+8,ty*T);
-  if(byPlayer&&t===7&&Math.random()<0.15) spawnDrop('faser',1,tx*T+8,ty*T);
+  if(byPlayer&&TILES[t].leaf&&Math.random()<0.15) spawnDrop('faser',1,tx*T+8,ty*T);
   if(byPlayer&&t===31&&Math.random()<0.4) spawnDrop('faser',1,tx*T+8,ty*T);
   if(byPlayer&&t===30&&Math.random()<0.3) spawnDrop('glas',1,tx*T+8,ty*T);
   // Darüberliegende "lose" Dinge fallen ab
@@ -121,8 +122,8 @@ function breakTile(tx,ty,byPlayer){ const t=tget(tx,ty), d=TILES[t]; if(!t||t===
   if(up===6) fellTree(tx,ty-1);
 }
 function fellTree(tx,ty){ const seen=new Set(); const st=[[tx,ty]]; let logs=0,leaves=0;
-  while(st.length&&seen.size<300){ const [x,y]=st.pop(); const k=x+','+y; if(seen.has(k)) continue; const t=tget(x,y); if(t!==6&&t!==7) continue; if(y>ty) continue; seen.add(k); if(t===6) logs++; else leaves++; tset(x,y,0);
-    st.push([x,y-1],[x-1,y],[x+1,y]); if(t===7) st.push([x,y+1]); }
+  while(st.length&&seen.size<300){ const [x,y]=st.pop(); const k=x+','+y; if(seen.has(k)) continue; const t=tget(x,y); if(t!==6&&!(TILES[t]&&TILES[t].leaf)) continue; if(y>ty) continue; seen.add(k); if(t===6) logs++; else leaves++; tset(x,y,0);
+    st.push([x,y-1],[x-1,y],[x+1,y]); if(t!==6) st.push([x,y+1]); }
   spawnDrop('holz',logs*2,tx*T+8,ty*T); if(leaves>4&&Math.random()<0.6) spawnDrop('faser',1+Math.random()*3|0,tx*T+8,ty*T-20); if(Math.random()<0.3) spawnDrop('beeren',1,tx*T,ty*T-10);
   sfx('brk'); G.cam.shake=2; partBurst(tx*T+8,ty*T-20,'#2f7a2f',16,150); if(!G.flags.tree){ G.flags.tree=true; msg('Holz! Öffne den Rucksack und stell dir eine Steinaxt her.','#ffcc80'); } }
 function dmgTile(tx,ty,amt){ const t=tget(tx,ty), d=TILES[t]; if(!t||t===5||t===17||!d) return; const i=ty*G.w.W+tx; const hpMax=d.h*25; const v=(G.dmg.get(i)||0)+amt; partBurst(tx*T+8,ty*T+8,d.c,2,60); if(v>=hpMax){ breakTile(tx,ty,false); } else G.dmg.set(i,v); }
@@ -149,12 +150,12 @@ function useHeld(dt,wx,wy,fresh){ const P=G.player; if(P.dead) return; const id=
 function frontTile(place){ const P=G.player; const fx=Math.floor((P.x+P.w/2)/T); const fy=Math.floor((P.y+P.h-1)/T); const jy=INPUT.jy;
   if(jy>0.5){ return {x:fx,y:fy+1}; } if(jy<-0.5){ return {x:fx,y:Math.floor((P.y-2)/T)}; }
   const nx=fx+P.dir;
-  if(place){ for(const y of [fy,fy-1,fy+1]){ if(canPlaceAt(nx,y,heldItem())) return {x:nx,y}; } return {x:nx,y:fy}; }
-  for(const y of [fy-1,fy,fy+1]){ const t=tget(nx,y); if(t&&t!==5) return {x:nx,y}; }
+  if(place){ for(const y of [fy,fy-1,fy-2,fy+1]){ if(canPlaceAt(nx,y,heldItem())) return {x:nx,y}; } return {x:nx,y:fy}; }
+  for(const y of [fy-1,fy,fy-2,fy+1]){ const t=tget(nx,y); if(t&&t!==5) return {x:nx,y}; }
   // Bäume vor der Figur
   return null; }
 function nearestHostile(r,front){ const P=G.player; let best=null,bd=r; for(const e of G.ents){ if(e.dead||e.kind!=='mob') continue; const d=MOBS[e.t]; if(!(hostile(e)||d.animal)) continue; const dd=dist(e,P); if(dd<bd){ if(front&&((e.x+e.w/2)-(P.x+P.w/2))*P.dir<-8&&dd>14) continue; bd=dd; best=e; } } return best; }
-function fireAt(d,tx,ty){ const P=G.player; const cx=P.x+P.w/2, cy=P.y+9;
+function fireAt(d,tx,ty){ const P=G.player; const cx=P.x+P.w/2, cy=P.y+17;
   if(d.ranged){ const am=d.ranged.ammo; if(countItem(am)<=0){ msg(`Keine Munition (${ITEMS[am].n}).`,'#ff8a80'); P.cd=0.5; return; } removeItem(am,1);
     const n=d.ranged.pellets||1; const ang=Math.atan2(ty-cy,tx-cx); const sk=1+P.sk.schuetze*0.15;
     for(let i=0;i<n;i++){ const a=ang+(n>1?(Math.random()-0.5)*d.ranged.spread:0); G.proj.push({x:cx,y:cy,vx:Math.cos(a)*d.ranged.spd,vy:Math.sin(a)*d.ranged.spd,grav:d.ranged.grav,dmg:d.dmg*sk,own:'p',type:am==='pfeil'?'arrow':'bullet',life:1.5}); }

@@ -47,7 +47,7 @@ function computeLight(x0,y0,w,h){
       const d=TILES[t]; if(d&&d.light) l=Math.max(l,d.light);
       LG[j*w+i]=l; } }
   // Lichtquellen aus Entitäten
-  const P=G.player; if(P){ const qx=Math.floor((P.x+P.w/2)/T)-x0, qy=Math.floor((P.y+10)/T)-y0; if(qx>=0&&qy>=0&&qx<w&&qy<h) LG[qy*w+qx]=Math.max(LG[qy*w+qx],0.42); const it=heldItem(); if(it==='fackel'){ const px0=Math.floor((P.x+P.w/2)/T)-x0, py0=Math.floor((P.y+8)/T)-y0; if(px0>=0&&py0>=0&&px0<w&&py0<h) LG[py0*w+px0]=Math.max(LG[py0*w+px0],0.9);} }
+  const P=G.player; if(P){ const qx=Math.floor((P.x+P.w/2)/T)-x0, qy=Math.floor((P.y+10)/T)-y0; if(qx>=0&&qy>=0&&qx<w&&qy<h) LG[qy*w+qx]=Math.max(LG[qy*w+qx],0.3); const it=heldItem(); if(it==='fackel'){ const px0=Math.floor((P.x+P.w/2)/T)-x0, py0=Math.floor((P.y+8)/T)-y0; if(px0>=0&&py0>=0&&px0<w&&py0<h) LG[py0*w+px0]=Math.max(LG[py0*w+px0],0.9);} }
   for(const p of G.parts){ if(p.light){ const a=Math.floor(p.x/T)-x0,b=Math.floor(p.y/T)-y0; if(a>=0&&b>=0&&a<w&&b<h) LG[b*w+a]=Math.max(LG[b*w+a],p.light);} }
   for(const e of G.proj){ if(e.light){ const a=Math.floor(e.x/T)-x0,b=Math.floor(e.y/T)-y0; if(a>=0&&b>=0&&a<w&&b<h) LG[b*w+a]=Math.max(LG[b*w+a],e.light);} }
   // Ausbreitung
