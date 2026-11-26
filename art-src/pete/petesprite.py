@@ -9,7 +9,7 @@ from PIL import Image, ImageFilter, ImageEnhance
 import numpy as np
 from collections import deque
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.abspath(os.path.join(HERE,'..','..'))
-FR=['stand','walk1','walk2','attack']
+FR=['stand','walk1','walk2','attack','grab']
 
 def cutout(im,tol=38,holes=False):
     a=np.asarray(im.convert('RGB')).astype(int); h,w,_=a.shape

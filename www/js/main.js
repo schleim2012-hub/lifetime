@@ -21,11 +21,11 @@ function loadGame(){ let d; try{ d=JSON.parse(localStorage.getItem(SAVE_KEY)); }
   if((d.v||1)<2) migrateV1(w);
   G.player=Object.assign(newPlayer(0,0),d.player); G.player.dead=false; ensureSkills(G.player); if(G.player.h!==40){ G.player.y-=40-G.player.h; G.player.x-=2; G.player.w=14; G.player.h=40; } if(G.player.hp<=0) G.player.hp=30;
   G.ents=d.ents.map(o=>{ if(o.kind==='npc'){ const n=makeNPC(o.t,o.home.x,o.home.y); Object.assign(n,{x:o.x,y:o.y-((d.v||1)<2?14:0),hp:o.hp,mode:o.mode||'home',recruited:o.recruited,met:o.met}); return n; } const m=makeMob(o.t,0,0,{camp:o.camp,rad:!!o.rad}); m.x=o.x; m.y=o.y-((d.v||1)<2?Math.max(0,m.h-26):0); m.hp=o.hp; m.sleep=!!o.sleep; return m; });
-  G.containers=d.containers||{}; G.time=d.time; G.day=d.day; G.cannAngry=d.cannAngry||0; G.flags=d.flags||{}; G.stats=d.stats||{kills:0,days:0}; G.explored=d.explored?rleDec(d.explored,200*40):new Uint8Array(8000);
+  G.containers=d.containers||{}; G.time=d.time; G.day=d.day; G.cannAngry=d.cannAngry||0; G.flags=d.flags||{}; G.stats=d.stats||{kills:0,days:0}; G.explored=d.explored?rleDec(d.explored,EXLEN()):new Uint8Array(EXLEN());
   G.bloodmoon=!!d.bloodmoon; G.bmSpawned=d.bmSpawned||0; G.bmKills=d.bmKills||0; G.proj=[]; G.parts=[]; G.drops=[]; G.nums=[]; G.boss=null; G.dmg=new Map(); G.msgs=[];
   startPlay(); return true; }
 function newGame(){ const seed=(Math.random()*1e9)|0; G.w=genWorld(seed); initSky(); const w=G.w;
-  G.player=newPlayer(w.spawn.x,w.spawn.y); ensureSkills(G.player); G.ents=[]; G.containers={}; G.time=0.04; G.day=1; G.cannAngry=0; G.flags={}; G.stats={kills:0,days:0}; G.explored=new Uint8Array(8000); G.bloodmoon=false; G.proj=[]; G.parts=[]; G.drops=[]; G.nums=[]; G.boss=null; G.dmg=new Map(); G.msgs=[];
+  G.player=newPlayer(w.spawn.x,w.spawn.y); ensureSkills(G.player); G.ents=[]; G.containers={}; G.time=0.04; G.day=1; G.cannAngry=0; G.flags={}; G.stats={kills:0,days:0}; G.explored=new Uint8Array(EXLEN()); G.bloodmoon=false; G.proj=[]; G.parts=[]; G.drops=[]; G.nums=[]; G.boss=null; G.dmg=new Map(); G.msgs=[];
   for(const e of w.ents){ if(e.k==='npc') G.ents.push(makeNPC(e.t,Math.round(e.x),Math.round(e.y))); else if(e.k==='mob') { const m=makeMob(e.t,Math.round(e.x),Math.round(e.y),{camp:e.camp,sleep:!!e.sleep}); G.ents.push(m); } }
   // Startausrüstung
   const P=G.player; P.inv[0]={id:'flasche',n:1}; P.inv[1]={id:'beeren',n:3}; P.inv[2]={id:'fackel',n:3}; P.sel=3;

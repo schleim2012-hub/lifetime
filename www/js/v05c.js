@@ -3,7 +3,14 @@
 // Werte je Gegner. Neue Ordner ohne Eintrag bekommen automatisch Standardwerte (leichter Zombie).
 const PETE_MOBDEF={
   hippie:{n:'Flower-Power-Fritz',hp:55,spd:30,dmg:8,w:14,h:40,xp:20,zombie:true,pete:true,joints:true,rainbow:true,talk:'hippie',tiers:[0,1,2,3]},
-  nurse:{n:'Schwester Schocktherapie',hp:85,spd:36,dmg:11,w:14,h:40,xp:30,zombie:true,pete:true,defi:true,talk:'nurse',tiers:[2,3,4]}
+  nurse:{n:'Schwester Schocktherapie',hp:85,spd:36,dmg:11,w:14,h:40,xp:30,zombie:true,pete:true,defi:true,talk:'nurse',tiers:[2,3,4]},
+  // 0.7: Endboss + Mini-Gegner aus dem Fernseher (Werte/Verhalten in v07.js; tiers:[] = spawnen nie von selbst)
+  tvzombie:{n:'Mainstream-TV-Zombie',hp:3200,spd:34,dmg:26,w:40,h:118,xp:1500,zombie:false,pete:true,boss:true,tiers:[]},
+  mini_slasher:{n:'Hackebeil-Hannes',hp:30,spd:62,dmg:7,w:12,h:24,xp:12,zombie:true,pete:true,mini:true,tiers:[]},
+  mini_vampir:{n:'Graf Bissfest',hp:26,spd:70,dmg:6,w:12,h:24,xp:12,zombie:true,pete:true,mini:true,tiers:[]},
+  mini_mumie:{n:'Mumien-Manni',hp:40,spd:40,dmg:6,w:12,h:24,xp:12,zombie:true,pete:true,mini:true,tiers:[]},
+  mini_clown:{n:'Clownchen Grinsekatz',hp:24,spd:66,dmg:5,w:12,h:24,xp:12,zombie:true,pete:true,mini:true,tiers:[]},
+  mini_affe:{n:'Affenkönig Bumbum',hp:45,spd:55,dmg:8,w:14,h:26,xp:15,zombie:true,pete:true,mini:true,tiers:[]}
 };
 const PETEI={};
 (function(){ const mk=u=>{ const i=new Image(); i.src=u; return i; };
