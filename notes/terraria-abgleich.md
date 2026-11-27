@@ -377,7 +377,7 @@ Reihenfolge: **Das Wachauge** → **Klärschlamm-König** (+ Schlammregen) → K
 - Gegner-Look: der Stil von Hippie und Schwester (Petes eigene Sprites) ist DER Look aller Gegner – damit hebt sich Lifetime von Terraria ab. NICHT auf Terraria-2px-Raster umstellen; neue Gegner an Hippie/Schwester angleichen.
 - Abheben auch durch lustige Verschwörungstheorien, was passiert sein könnte (Story, Notizen, NPC-Sprüche, Lore-Funde).
 - Blutmond fest alle 7 Tage (nicht zufällig). Tag etwas länger als Nacht. Während eines Bosskampfs bleibt es Nacht, wird nicht hell bis der Kampf vorbei ist.
-- TV-Zombie-Fernbedienung: verschießt Strahlen wie Radiowellen. Beim Sieg: Fernbedienung als Waffe + elektrische Komponente für den baubaren Generator. TV-Kopf mitnehmbar, aufstellbar; mit Strom einschaltbar, lockt dann Zombies in der Nähe an (Köder-Mechanik).
+- TV-Zombie-Fernbedienung: verschießt Strahlen wie Radiowellen. Beim Sieg: Fernbedienung NUR als Fernkampfwaffe (kein Generator-Teil!) + ZUSÄTZLICH ein separates elektrisches Bauteil, das man für den Generator braucht. TV-Kopf mitnehmbar, aufstellbar; mit Strom einschaltbar, lockt dann Zombies in der Nähe an (Köder-Mechanik).
 - BUG: Bei Tieren startet die Kampfmusik – nervt. Kampfmusik nur bei feindlichen Gegnern/Bossen.
 - Alles aus der Fehlt-Liste muss rein: Lava/Unterwelt, Fische/Angeln, Invasionen, NPC-Häuser, Set-Boni, Accessoires, Präfixe, Beschwörer, zweite Weltphase usw.
 - 2–3 neue Hintergrund-Songs für verschiedene Biome.
