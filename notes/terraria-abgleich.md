@@ -371,3 +371,16 @@ Reihenfolge: **Das Wachauge** → **Klärschlamm-König** (+ Schlammregen) → K
 - Handy-Leistung bei mehr Licht-/Partikel-Effekten (Zauber) → Partikel-Budget, Test auf Mobile-Emulation mit CPU-Drosselung (Playwright `Emulation.setCPUThrottlingRate` 4×).
 - Save-Kompatibilität bei neuen Schichten/Erzen → nur neue Welten bekommen sie; alte Saves bekommen Hinweis wie in 0.7.
 - 2-px-Umstellung kann Petes Figuren verfremden → nur mit grain-Option, Original-Ausgabe bleibt reproduzierbar.
+
+## Petes Entscheidungen (2026-11-27, t1625u) – haben Vorrang vor allen Standardannahmen oben
+- TV-Zombie = erster großer Boss (nicht Endboss).
+- Gegner-Look: der Stil von Hippie und Schwester (Petes eigene Sprites) ist DER Look aller Gegner – damit hebt sich Lifetime von Terraria ab. NICHT auf Terraria-2px-Raster umstellen; neue Gegner an Hippie/Schwester angleichen.
+- Abheben auch durch lustige Verschwörungstheorien, was passiert sein könnte (Story, Notizen, NPC-Sprüche, Lore-Funde).
+- Blutmond fest alle 7 Tage (nicht zufällig). Tag etwas länger als Nacht. Während eines Bosskampfs bleibt es Nacht, wird nicht hell bis der Kampf vorbei ist.
+- TV-Zombie-Fernbedienung: verschießt Strahlen wie Radiowellen. Beim Sieg: Fernbedienung als Waffe + elektrische Komponente für den baubaren Generator. TV-Kopf mitnehmbar, aufstellbar; mit Strom einschaltbar, lockt dann Zombies in der Nähe an (Köder-Mechanik).
+- BUG: Bei Tieren startet die Kampfmusik – nervt. Kampfmusik nur bei feindlichen Gegnern/Bossen.
+- Alles aus der Fehlt-Liste muss rein: Lava/Unterwelt, Fische/Angeln, Invasionen, NPC-Häuser, Set-Boni, Accessoires, Präfixe, Beschwörer, zweite Weltphase usw.
+- 2–3 neue Hintergrund-Songs für verschiedene Biome.
+- Himmel-Bereich (Sky-Ebene) mit leicht grünlichen Wolken (Atomwolken-Stimmung).
+- Erster richtiger Boss: Homage an den Toxic-Avenger-Splatterfilm der 80er, Arbeitstitel „The Toxic Avendture“ (eigener Name im Spiel, kein Original-Name). Pete besorgt ein Pixel-Vorlagenbild per Image-to-Prompt – auf sein Bild warten, nicht vorher selbst entwerfen.
+- Weitere Bosse: thematisch passend als Anlehnung an andere Survival-Games und Filme – mit Pete gemeinsam festlegen, nicht eigenmächtig finalisieren.
